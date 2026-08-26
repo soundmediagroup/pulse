@@ -286,7 +286,7 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
 // Public version + health endpoints. The Dashboard footer pings /api/version
 // to display the live build (resilient to bundled VITE env going stale).
 app.get("/api/version", (_req, res) => res.json(BUILD));
-app.get("/api/healthz", (_req, res) => res.json({ ok: true, version: BUILD.version, deployPipelineTest: "onyx-2026-08-26" }));
+app.get("/api/healthz", (_req, res) => res.json({ ok: true, version: BUILD.version }));
 
 app.get("/login", (req, res) => {
   if ((req.session as any).authenticated) return res.redirect("/");
