@@ -1,0 +1,172 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* StereoNET dark palette — #1a1a1a body, #e8312a red accent */
+    --background: 0 0% 10%;        /* #1a1a1a */
+    --foreground: 0 0% 90%;        /* near-white */
+    --card: 0 0% 13%;              /* slightly lighter than bg */
+    --card-foreground: 0 0% 90%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 90%;
+    --primary: 2 79% 54%;          /* #e8312a StereoNET red */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 72%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 50%;
+    --accent: 2 79% 54%;           /* #e8312a */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 2 79% 54%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 22%;
+    --input: 0 0% 20%;
+    --ring: 2 79% 54%;
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 8%; /* #141414 */
+    --sidebar-foreground: 0 0% 65%;
+    --sidebar-primary: 2 79% 54%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 88%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 2 79% 54%;
+  }
+
+  .light {
+    --background: 215 28% 97%;
+    --foreground: 224 22% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 22% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 22% 12%;
+    --primary: 185 72% 32%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 215 20% 92%;
+    --secondary-foreground: 224 18% 28%;
+    --muted: 215 20% 92%;
+    --muted-foreground: 224 12% 48%;
+    --accent: 185 72% 32%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 215 18% 84%;
+    --input: 215 18% 92%;
+    --ring: 185 72% 32%;
+
+    --sidebar-background: 224 22% 13%;
+    --sidebar-foreground: 215 15% 78%;
+    --sidebar-primary: 185 72% 48%;
+    --sidebar-primary-foreground: 224 22% 8%;
+    --sidebar-accent: 224 18% 20%;
+    --sidebar-accent-foreground: 215 15% 88%;
+    --sidebar-border: 224 14% 22%;
+    --sidebar-ring: 185 72% 48%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Cabinet Grotesk', 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  html, body, #root { height: 100%; margin: 0; padding: 0; }
+
+  .tabular-nums { font-variant-numeric: tabular-nums lining-nums; }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
+
+  /* Email body render (press release modal) — neutralise inline colours */
+  .press-email-body,
+  .press-email-body *:not(a) {
+    color: hsl(var(--foreground)) !important;
+    background-color: transparent !important;
+  }
+  .press-email-body { line-height: 1.55; overflow-x: hidden; }
+  .press-email-body * { max-width: 100% !important; box-sizing: border-box; }
+  .press-email-body img { max-width: 100% !important; height: auto !important; width: auto !important; border-radius: 4px; margin: 8px 0; }
+  .press-email-body table { width: 100% !important; max-width: 100% !important; table-layout: auto; display: block; overflow-x: auto; }
+  .press-email-body td, .press-email-body th { min-width: 0; word-break: break-word; }
+  .press-email-body [width] { max-width: 100% !important; }
+  .press-email-body a, .press-email-body a * { color: #a855f7 !important; text-decoration: underline; }
+  .press-email-body a:hover, .press-email-body a:hover * { color: #c084fc !important; }
+  .press-email-body p { margin: 0 0 10px; }
+  .press-email-body h1, .press-email-body h2, .press-email-body h3 { margin: 16px 0 8px; font-weight: 600; }
+  .press-email-body table { border-collapse: collapse; margin: 8px 0; }
+  .press-email-body td, .press-email-body th { padding: 4px 8px; border: 1px solid hsl(var(--border)); }
+  .press-email-body blockquote { border-left: 3px solid hsl(var(--border)); padding-left: 12px; margin: 8px 0; color: hsl(var(--muted-foreground)) !important; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fade-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee 30s linear infinite; }
+
+/* Discovery redesign — typographic anchor */
+.font-display {
+  font-family: 'Cabinet Grotesk', 'Inter', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.font-editorial {
+  font-family: 'Source Serif 4', 'Georgia', serif;
+  font-weight: 500;
+  font-style: italic;
+}
+
+/* Staggered reveal on Discovery article list — respects reduced motion */
+@keyframes stagger-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.stagger-reveal > * {
+  animation: stagger-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.stagger-reveal > *:nth-child(1)  { animation-delay: 0ms;  }
+.stagger-reveal > *:nth-child(2)  { animation-delay: 40ms; }
+.stagger-reveal > *:nth-child(3)  { animation-delay: 80ms; }
+.stagger-reveal > *:nth-child(4)  { animation-delay: 120ms; }
+.stagger-reveal > *:nth-child(5)  { animation-delay: 160ms; }
+.stagger-reveal > *:nth-child(6)  { animation-delay: 200ms; }
+.stagger-reveal > *:nth-child(7)  { animation-delay: 240ms; }
+.stagger-reveal > *:nth-child(8)  { animation-delay: 280ms; }
+.stagger-reveal > *:nth-child(9)  { animation-delay: 320ms; }
+.stagger-reveal > *:nth-child(10) { animation-delay: 360ms; }
+.stagger-reveal > *:nth-child(11) { animation-delay: 400ms; }
+.stagger-reveal > *:nth-child(12) { animation-delay: 440ms; }
+.stagger-reveal > *:nth-child(n+13) { animation-delay: 480ms; }
+@media (prefers-reduced-motion: reduce) {
+  .stagger-reveal > * { animation: none; }
+}
+
+/* Primary source lane — dedicated visual band for signals ahead of publisher coverage */
+.primary-lane-card {
+  border-left: 3px solid #e8312a;
+  background: linear-gradient(90deg, rgba(232, 49, 42, 0.08) 0%, rgba(232, 49, 42, 0.02) 40%, transparent 100%);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.primary-lane-card:hover {
+  background: linear-gradient(90deg, rgba(232, 49, 42, 0.14) 0%, rgba(232, 49, 42, 0.04) 40%, transparent 100%);
+}

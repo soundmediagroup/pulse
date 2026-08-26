@@ -1,0 +1,20 @@
+services:
+  cadence-tracker:
+    build: .
+    container_name: cadence-tracker
+    restart: unless-stopped
+    ports:
+      - "3456:5000"        # Change 3456 to any free port on your Synology
+    volumes:
+      - cadence-data:/app/data
+      - cadence-dist:/app/dist   # SQLite database persists across restarts/updates
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: "5000"
+      DB_PATH: /app/data/cadence_tracker.db
+
+volumes:
+  cadence-data:
+  cadence-dist:

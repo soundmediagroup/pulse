@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StereoNET Dashboard — Retrying…</title>
+<meta name="robots" content="noindex">
+<style>
+  :root {
+    --bg: #0e0e10;
+    --card: #17171a;
+    --border: #26262c;
+    --text: #f5f5f7;
+    --muted: #9ca3af;
+    --orange: #e8312a;
+    --orange-hover: #d62b24;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+  .card {
+    max-width: 480px;
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 2.5rem 2.25rem;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+  .brand {
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.75rem;
+    font-weight: 700;
+  }
+  .brand span { color: var(--orange); }
+  h1 {
+    font-size: 1.35rem;
+    margin: 0 0 0.85rem;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+  p {
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.55;
+    margin: 0 0 1.5rem;
+  }
+  .spinner {
+    width: 44px;
+    height: 44px;
+    margin: 0 auto 1.5rem;
+    border: 3px solid rgba(232, 49, 42, 0.18);
+    border-top-color: var(--orange);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .countdown {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin: 0.5rem 0 1.75rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .countdown strong { color: var(--text); font-weight: 600; }
+  button {
+    background: var(--orange);
+    color: #fff;
+    border: 0;
+    padding: 0.7rem 1.6rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  button:hover { background: var(--orange-hover); }
+  button:active { transform: translateY(1px); }
+  .foot {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .foot a { color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+  .foot a:hover { color: var(--text); }
+</style>
+</head>
+<body>
+  <div class="card" role="alert" aria-live="polite">
+    <div class="brand">Stereo<span>NET</span> · Dashboard</div>
+    <div class="spinner" aria-hidden="true"></div>
+    <h1>Reconnecting to the dashboard</h1>
+    <p>Our server briefly took too long to answer. This is almost always temporary — we're going to retry automatically.</p>
+    <div class="countdown">Retrying in <strong id="cd">5</strong>s…</div>
+    <button type="button" id="retry-now">Retry now</button>
+    <div class="foot">
+      If this persists for more than a minute, please email <a href="mailto:marc@stereonet.com">marc@stereonet.com</a>. Include what page you were trying to reach.
+    </div>
+    <!--
+      Required Cloudflare integration token. Cloudflare replaces this at serve
+      time with its own error metadata block; we hide it visually so our page
+      stays clean, but the raw string MUST be present for CF to accept the
+      custom error page upload.
+    -->
+    <div style="display:none" aria-hidden="true">::CLOUDFLARE_ERROR_500S_BOX::</div>
+  </div>
+<script>
+(function(){
+  var el = document.getElementById('cd');
+  var btn = document.getElementById('retry-now');
+  var n = 5;
+  function tick() {
+    n -= 1;
+    if (n <= 0) { location.reload(); return; }
+    el.textContent = n;
+    setTimeout(tick, 1000);
+  }
+  setTimeout(tick, 1000);
+  btn.addEventListener('click', function(){ location.reload(); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+node_modules/
+dist/
+dist-source/
+.env
+*.db
+*.db-journal
+press-attachments/
+deploy.zip
+.DS_Store

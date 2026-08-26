@@ -1,0 +1,44 @@
+<!--
+  PULSE Retailer Tracking Snippet
+  -------------------------------
+  Drop this into the EE template that renders a single retailer detail page
+  (e.g. retailers/_index or whatever template controls
+  /retailers/{url_title}). Place it just before </body>.
+
+  The {entry_id} tag is the EE channel-entry tag for the current entry.
+  Change it to the correct EE variable if your template uses a different one.
+-->
+
+<!-- 1x1 page-view pixel -->
+<img src="https://dashboard.stereonet.com/track/r?id={entry_id}"
+     alt="" width="1" height="1"
+     style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0"
+     referrerpolicy="no-referrer-when-downgrade" />
+
+<!-- Outbound + on-page link click tracking. Hooks all <a> inside the
+     retailer card. Fires the click endpoint then lets the navigation
+     continue normally (sendBeacon is fire-and-forget). -->
+<script>
+(function () {
+  var ENTRY = {entry_id};
+  var ENDPOINT = "https://dashboard.stereonet.com/track/r/click";
+  // Scope to the retailer entry container. Adjust selector if your
+  // template wraps the listing in a different element.
+  var scope = document.querySelector(".retailer-detail, .retailer-listing, main") || document;
+  scope.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("a[href]");
+    if (!a) return;
+    var url = a.href || "";
+    if (!url) return;
+    try {
+      var payload = ENDPOINT + "?id=" + encodeURIComponent(ENTRY) + "&u=" + encodeURIComponent(url);
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(payload);
+      } else {
+        var i = new Image();
+        i.src = payload;
+      }
+    } catch (err) { /* ignore */ }
+  }, true);
+})();
+</script>

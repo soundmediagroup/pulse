@@ -1,0 +1,714 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow">
+  <meta name="description" content="StereoNET — a world leading independent publisher of hi-fi, headphones, audio-visual, home theatre and more. Reach decades-deep audiophiles ready to buy. Request our Media Kit.">
+  <meta name="theme-color" content="#0a0a0b" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <title>Advertise with StereoNET — World Leading Independent Audio Publisher</title>
+  <link rel="canonical" href="https://www.stereonet.com/advertising">
+  <link rel="icon" href="/stereonet-logo.svg" type="image/svg+xml">
+  <meta property="og:title" content="Advertise with StereoNET — World Leading Independent Audio Publisher">
+  <meta property="og:description" content="Hi-fi, headphones, AV, home theatre and more. 700K monthly readers, 100K-strong forum community, 4.7M social reach. Request our Media Kit.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.stereonet.com/advertising">
+  <style>
+    html, body { margin: 0; padding: 0; min-height: 100vh; }
+    body {
+      background: #ffffff;
+      color: #1a1a1c;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    @media (prefers-color-scheme: dark) {
+      body { background: #0a0a0b; color: #f4f4f5; }
+    }
+    .sn-site-header { background: #0a0a0b; border-bottom: 1px solid #1a1a1c; padding: 24px 0; text-align: center; }
+    .sn-site-header a { display: inline-block; line-height: 0; }
+    .sn-site-header img { height: 220px; width: auto; display: block; }
+    @media (max-width: 600px) { .sn-site-header { padding: 16px 0; } .sn-site-header img { height: 140px; } }
+    .sn-site-footer { background: #0a0a0b; color: #888; padding: 32px 16px; text-align: center; font-size: 13px; margin-top: 48px; }
+    .sn-site-footer a { color: #aaa; text-decoration: none; }
+    .sn-site-footer a:hover { color: #fff; }
+  </style>
+</head>
+<body>
+  <header class="sn-site-header">
+    <a href="https://www.stereonet.com"><img src="/stereonet-logo.svg" alt="StereoNET"></a>
+  </header>
+<!--
+  StereoNET — Advertising landing page
+  Drop this whole block into the EE template/page body at stereonet.com/advertising
+  All styles are scoped under .sn-adv so they won't bleed into the rest of your site chrome.
+  Form posts to https://dashboard.stereonet.com/api/media-kit/request via fetch().
+-->
+<style>
+  /* ─── Theme tokens ─────────────────────────────────────────────────────
+     The page adapts to light or dark mode via three mechanisms:
+     1. `prefers-color-scheme: dark` media query (system preference)
+     2. `[data-theme="dark"]` attribute (if your EE template sets it)
+     3. `.dark` ancestor class (if your EE template uses Tailwind-style class)
+     If none apply, the page uses light defaults that work on white EE backgrounds.
+  ─────────────────────────────────────────────────────────────────────── */
+  .sn-adv {
+    --sn-accent: #e8312a;
+    --sn-accent-hover: #ff4f48;
+    --sn-text: #1a1a1c;
+    --sn-text-soft: #2a2a2e;
+    --sn-muted: #6b6b70;
+    --sn-card: #f8f8fa;
+    --sn-card-2: #1a1a1c;          /* inverted card (PULSE block) */
+    --sn-card-2-text: #fff;
+    --sn-card-2-text-soft: #d0d0d3;
+    --sn-border: #e8e8eb;
+    --sn-input-bg: #fff;
+    --sn-input-border: #d0d0d3;
+    --sn-bar-bg: #e8e8eb;
+    --sn-bar-fill-from: #b0b0b3;
+    --sn-bar-fill-to: #d0d0d3;
+    --sn-success-bg: #ecfdf5;
+    --sn-success-border: #86efac;
+    --sn-success-text: #14532d;
+    --sn-error-bg: #fef2f2;
+    --sn-error-border: #fca5a5;
+    --sn-error-text: #7f1d1d;
+  }
+  @media (prefers-color-scheme: dark) {
+    .sn-adv {
+      --sn-text: #f4f4f5;
+      --sn-text-soft: #d4d4d7;
+      --sn-muted: #9a9aa0;
+      --sn-card: #1c1c1f;
+      --sn-card-2: #0e0e10;
+      --sn-card-2-text: #fff;
+      --sn-card-2-text-soft: #b0b0b6;
+      --sn-border: #2a2a2e;
+      --sn-input-bg: #14141680;
+      --sn-input-border: #3a3a3f;
+      --sn-bar-bg: #2a2a2e;
+      --sn-bar-fill-from: #4a4a50;
+      --sn-bar-fill-to: #6b6b70;
+      --sn-success-bg: rgba(34,197,94,0.12);
+      --sn-success-border: rgba(34,197,94,0.4);
+      --sn-success-text: #86efac;
+      --sn-error-bg: rgba(239,68,68,0.12);
+      --sn-error-border: rgba(239,68,68,0.4);
+      --sn-error-text: #fca5a5;
+    }
+  }
+  [data-theme="dark"] .sn-adv,
+  .dark .sn-adv,
+  .sn-adv[data-theme="dark"] {
+    --sn-text: #f4f4f5;
+    --sn-text-soft: #d4d4d7;
+    --sn-muted: #9a9aa0;
+    --sn-card: #1c1c1f;
+    --sn-card-2: #0e0e10;
+    --sn-card-2-text: #fff;
+    --sn-card-2-text-soft: #b0b0b6;
+    --sn-border: #2a2a2e;
+    --sn-input-bg: #14141680;
+    --sn-input-border: #3a3a3f;
+    --sn-bar-bg: #2a2a2e;
+    --sn-bar-fill-from: #4a4a50;
+    --sn-bar-fill-to: #6b6b70;
+    --sn-success-bg: rgba(34,197,94,0.12);
+    --sn-success-border: rgba(34,197,94,0.4);
+    --sn-success-text: #86efac;
+    --sn-error-bg: rgba(239,68,68,0.12);
+    --sn-error-border: rgba(239,68,68,0.4);
+    --sn-error-text: #fca5a5;
+  }
+
+  .sn-adv * { box-sizing: border-box; }
+  .sn-adv { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; color: var(--sn-text); max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  @media (max-width: 600px) { .sn-adv { padding: 0 16px; } }
+  .sn-adv .accent { color: var(--sn-accent); }
+  .sn-adv .muted { color: var(--sn-muted); }
+
+  /* Hero */
+  .sn-adv-hero { padding: 64px 0 40px; text-align: center; }
+  @media (max-width: 600px) { .sn-adv-hero { padding: 40px 0 24px; } }
+  .sn-adv-hero h1 { font-size: clamp(28px, 5vw, 56px); font-weight: 800; letter-spacing: -0.025em; line-height: 1.05; margin: 0 auto 16px; color: var(--sn-text); max-width: 980px; }
+  .sn-adv-hero .lede { font-size: clamp(15px, 1.8vw, 20px); color: var(--sn-text-soft); max-width: 720px; margin: 0 auto 28px; line-height: 1.5; }
+  .sn-adv-cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+  .sn-adv-btn-primary { display: inline-block; background: var(--sn-accent); color: #fff; font-weight: 700; font-size: 15px; padding: 14px 26px; border-radius: 8px; text-decoration: none; transition: background 0.15s; border: none; cursor: pointer; line-height: 1.2; }
+  .sn-adv-btn-primary:hover { background: var(--sn-accent-hover); color: #fff; }
+  .sn-adv-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+  .sn-adv-btn-secondary { display: inline-block; background: transparent; color: var(--sn-text); font-weight: 700; font-size: 15px; padding: 13px 25px; border-radius: 8px; text-decoration: none; border: 1.5px solid var(--sn-input-border); transition: border-color 0.15s; cursor: pointer; line-height: 1.2; }
+  .sn-adv-btn-secondary:hover { border-color: var(--sn-accent); color: var(--sn-accent); }
+
+  /* Numbers grid — three labeled rows: scale + audience + AI */
+  .sn-adv-stats-block { border-top: 1px solid var(--sn-border); border-bottom: 1px solid var(--sn-border); padding: 48px 0; margin-top: 24px; }
+  .sn-adv-stats-row { margin-bottom: 36px; }
+  .sn-adv-stats-row:last-of-type { margin-bottom: 0; }
+  .sn-adv-stats-row-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--sn-muted); margin: 0 0 18px; display: flex; align-items: center; gap: 12px; }
+  .sn-adv-stats-row-label::after { content: ''; flex: 1; height: 1px; background: var(--sn-border); }
+  .sn-adv-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  @media (max-width: 1024px) { .sn-adv-stats-grid { grid-template-columns: repeat(2, 1fr); } }
+  .sn-adv-stat { padding: 20px 22px; background: var(--sn-card); border: 1px solid var(--sn-border); border-radius: 10px; transition: border-color 0.15s, transform 0.15s; }
+  .sn-adv-stat:hover { border-color: var(--sn-accent); transform: translateY(-1px); }
+  .sn-adv-stat-num { font-size: clamp(24px, 2.8vw, 34px); font-weight: 800; color: var(--sn-accent); line-height: 1; letter-spacing: -0.02em; }
+  .sn-adv-stat-num sup { font-size: 0.4em; color: var(--sn-accent); font-weight: 700; margin-left: 2px; vertical-align: super; }
+  .sn-adv-stat-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--sn-text); margin-top: 10px; line-height: 1.35; }
+  .sn-adv-stat-sub { font-size: 11px; color: var(--sn-muted); margin-top: 4px; line-height: 1.4; font-weight: 500; }
+  .sn-adv-stats-footnote { font-size: 11px; color: var(--sn-muted); margin: 32px 0 0; line-height: 1.55; max-width: 720px; }
+  .sn-adv-stats-footnote sup { color: var(--sn-accent); font-weight: 700; }
+
+  /* Section heading */
+  .sn-adv-section { padding: 72px 0 40px; }
+  @media (max-width: 600px) { .sn-adv-section { padding: 48px 0 24px; } }
+  .sn-adv-section h2 { font-size: clamp(22px, 3vw, 36px); font-weight: 800; letter-spacing: -0.02em; margin: 0 0 12px; color: var(--sn-text); }
+  .sn-adv-section h2 .accent { color: var(--sn-accent); }
+  .sn-adv-section .section-lede { font-size: clamp(15px, 1.5vw, 17px); color: var(--sn-text-soft); margin: 0 0 32px; line-height: 1.55; max-width: 760px; }
+
+  /* Research bar chart */
+  .sn-adv-research { background: var(--sn-card); border-radius: 14px; padding: 32px; margin: 24px 0; }
+  @media (max-width: 600px) { .sn-adv-research { padding: 20px; } }
+  .sn-adv-highlight { background: linear-gradient(90deg, rgba(232,49,42,0.12) 0%, rgba(232,49,42,0.02) 100%); border: 1px solid rgba(232,49,42,0.3); border-radius: 10px; padding: 18px 22px; display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+  @media (max-width: 600px) { .sn-adv-highlight { padding: 14px 16px; gap: 12px; } }
+  .sn-adv-highlight-pct { font-size: clamp(32px, 6vw, 44px); font-weight: 800; color: var(--sn-accent); line-height: 1; letter-spacing: -0.02em; flex-shrink: 0; }
+  .sn-adv-highlight-label { font-size: clamp(13px, 1.5vw, 15px); font-weight: 600; color: var(--sn-text); }
+  .sn-adv-bars { display: flex; flex-direction: column; gap: 8px; }
+  .sn-adv-bar-row { display: grid; grid-template-columns: 240px 1fr 50px; gap: 12px; align-items: center; font-size: 13px; }
+  @media (max-width: 720px) { .sn-adv-bar-row { grid-template-columns: 1fr 50px; gap: 6px 8px; } .sn-adv-bar-row .sn-adv-bar-name { grid-column: 1 / 3; } .sn-adv-bar-row .sn-adv-bar-track { grid-column: 1; } .sn-adv-bar-row .sn-adv-bar-pct { grid-column: 2; } }
+  .sn-adv-bar-name { color: var(--sn-text-soft); }
+  .sn-adv-bar-hl .sn-adv-bar-name { color: var(--sn-accent); font-weight: 700; }
+  .sn-adv-bar-track { background: var(--sn-bar-bg); height: 16px; border-radius: 3px; overflow: hidden; }
+  .sn-adv-bar-fill { height: 100%; background: linear-gradient(90deg, var(--sn-bar-fill-from), var(--sn-bar-fill-to)); }
+  .sn-adv-bar-hl .sn-adv-bar-fill { background: linear-gradient(90deg, var(--sn-accent), #ff6b5e); }
+  .sn-adv-bar-pct { font-size: 13px; font-weight: 700; color: var(--sn-text); text-align: right; }
+  .sn-adv-bar-hl .sn-adv-bar-pct { color: var(--sn-accent); }
+  .sn-adv-research-note { font-size: 12px; color: var(--sn-muted); margin-top: 20px; font-style: italic; }
+
+  /* Audience 3-column */
+  .sn-adv-audience { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin: 24px 0; }
+  @media (max-width: 720px) { .sn-adv-audience { grid-template-columns: 1fr; gap: 16px; } }
+  .sn-adv-audience-col { background: var(--sn-card); border-radius: 12px; padding: 24px; }
+  @media (max-width: 600px) { .sn-adv-audience-col { padding: 20px; } }
+  .sn-adv-audience-col h3 { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sn-muted); margin: 0 0 16px; }
+  .sn-adv-audience-col ul { list-style: none; padding: 0; margin: 0; }
+  .sn-adv-audience-col li { font-size: 15px; line-height: 1.45; margin-bottom: 10px; color: var(--sn-text); }
+  .sn-adv-audience-col li strong { color: var(--sn-accent); font-weight: 800; }
+
+  /* Partnership menu */
+  .sn-adv-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 32px; margin: 24px 0; }
+  @media (max-width: 720px) { .sn-adv-menu { grid-template-columns: 1fr; } }
+  .sn-adv-menu-item { display: flex; gap: 18px; padding: 16px 0; border-top: 1px solid var(--sn-border); }
+  .sn-adv-menu-num { font-size: 28px; font-weight: 800; color: var(--sn-accent); letter-spacing: -0.02em; line-height: 1; min-width: 40px; flex-shrink: 0; }
+  .sn-adv-menu-text strong { display: block; font-size: 16px; font-weight: 700; margin-bottom: 4px; color: var(--sn-text); }
+  .sn-adv-menu-text p { font-size: 14px; color: var(--sn-muted); margin: 0; line-height: 1.45; }
+
+  /* Powered by PULSE (inverted card — always dark in both themes) */
+  .sn-adv-pulse { background: var(--sn-card-2); color: var(--sn-card-2-text); border-radius: 14px; padding: 48px; margin: 24px 0; }
+  @media (max-width: 600px) { .sn-adv-pulse { padding: 28px 22px; } }
+  .sn-adv-pulse-eyebrow { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; color: var(--sn-accent); margin-bottom: 12px; }
+  .sn-adv-pulse h2 { color: var(--sn-card-2-text); font-size: clamp(22px, 3vw, 32px); margin: 0 0 16px; }
+  .sn-adv-pulse p { font-size: clamp(14px, 1.5vw, 16px); line-height: 1.6; color: var(--sn-card-2-text-soft); margin: 0 0 14px; max-width: 720px; }
+  .sn-adv-pulse-link { color: var(--sn-accent); text-decoration: none; font-weight: 700; border-bottom: 1px solid rgba(232,49,42,0.4); transition: border-color 0.15s; }
+  .sn-adv-pulse-link:hover { border-bottom-color: var(--sn-accent); }
+
+  /* Form */
+  .sn-adv-form-wrap { background: var(--sn-card); border-radius: 14px; padding: 40px; margin: 24px 0 80px; }
+  @media (max-width: 600px) { .sn-adv-form-wrap { padding: 24px 18px; margin-bottom: 48px; } }
+  .sn-adv-form-wrap h2 { margin: 0 0 8px; color: var(--sn-text); }
+  .sn-adv-form-wrap .section-lede { margin-bottom: 24px; }
+  .sn-adv-form { display: grid; gap: 16px; max-width: 640px; }
+  .sn-adv-form-row { display: grid; gap: 16px; }
+  .sn-adv-form-row.two { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 600px) { .sn-adv-form-row.two { grid-template-columns: 1fr; } }
+  .sn-adv-form label { display: block; font-size: 13px; font-weight: 700; color: var(--sn-text); margin-bottom: 6px; }
+  .sn-adv-form label .req { color: var(--sn-accent); }
+  .sn-adv-form input[type="text"],
+  .sn-adv-form input[type="email"],
+  .sn-adv-form select,
+  .sn-adv-form textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--sn-input-border);
+    border-radius: 8px;
+    font-size: 16px;       /* 16px+ prevents iOS Safari auto-zoom on focus */
+    font-family: inherit;
+    color: var(--sn-text);
+    background: var(--sn-input-bg);
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .sn-adv-form select {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%236b6b70' d='M8 11.5 3 6.5h10z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 38px;
+  }
+  .sn-adv-form input:focus,
+  .sn-adv-form select:focus,
+  .sn-adv-form textarea:focus {
+    outline: none;
+    border-color: var(--sn-accent);
+    box-shadow: 0 0 0 3px rgba(232,49,42,0.18);
+  }
+  .sn-adv-form textarea { min-height: 100px; resize: vertical; }
+  .sn-adv-interests { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 16px; }
+  @media (max-width: 600px) { .sn-adv-interests { grid-template-columns: 1fr; } }
+  .sn-adv-interest { display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; padding: 6px 0; color: var(--sn-text); }
+  .sn-adv-interest input { accent-color: var(--sn-accent); width: 18px; height: 18px; flex-shrink: 0; }
+  .sn-adv-honey { position: absolute; left: -9999px; opacity: 0; pointer-events: none; }
+  .sn-adv-submit-row { display: flex; gap: 12px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+  .sn-adv-submit-row .muted { font-size: 12px; color: var(--sn-muted); }
+  .sn-adv-form-result { padding: 18px 20px; border-radius: 10px; margin-top: 16px; display: none; font-size: 14px; line-height: 1.5; }
+  .sn-adv-form-result.success { display: block; background: var(--sn-success-bg); border: 1px solid var(--sn-success-border); color: var(--sn-success-text); }
+  .sn-adv-form-result.error { display: block; background: var(--sn-error-bg); border: 1px solid var(--sn-error-border); color: var(--sn-error-text); }
+  .sn-adv-form-result a { color: inherit; font-weight: 700; }
+
+  /* Footer */
+  .sn-adv-foot { text-align: center; padding: 32px 0; color: var(--sn-muted); font-size: 13px; border-top: 1px solid var(--sn-border); margin-top: 24px; }
+  .sn-adv-foot a { color: inherit; }
+</style>
+
+<div class="sn-adv">
+
+  <!-- ─── Hero ─────────────────────────────────────────────────────────── -->
+  <section class="sn-adv-hero">
+    <h1>A <span class="accent">world leading</span> independent publisher.</h1>
+    <p class="lede">Hi-fi, headphones, audio-visual, home theatre and more. StereoNET delivers the audience that audio brands chase — informed, affluent, and globally distributed.</p>
+    <div class="sn-adv-cta-row">
+      <a href="#request" class="sn-adv-btn-primary">Request a Media Kit</a>
+    </div>
+  </section>
+
+  <!-- ─── Numbers grid ──────────────────────────────────────────────── -->
+  <section class="sn-adv-stats-block">
+    <div class="sn-adv-stats-row">
+      <div class="sn-adv-stats-row-label">Audience Quality</div>
+      <div class="sn-adv-stats-grid">
+        <div class="sn-adv-stat"><div class="sn-adv-stat-num">590K+<sup>*</sup></div><div class="sn-adv-stat-label">Monthly Human Visitors</div><div class="sn-adv-stat-sub">Bots removed · GA4 verified</div></div>
+        <div class="sn-adv-stat"><div class="sn-adv-stat-num">1.3M+</div><div class="sn-adv-stat-label">Human Page Views / Month</div><div class="sn-adv-stat-sub">Bots removed · GA4 verified</div></div>
+        <div class="sn-adv-stat"><div class="sn-adv-stat-num">86%</div><div class="sn-adv-stat-label">In Hobby 20+ Years</div><div class="sn-adv-stat-sub">StereoNET Reader Survey, May 2026</div></div>
+        <div class="sn-adv-stat"><div class="sn-adv-stat-num">#11</div><div class="sn-adv-stat-label">Similarweb Global Rank</div><div class="sn-adv-stat-sub">Consumer Electronics</div></div>
+      </div>
+    </div>
+
+    <div class="sn-adv-stats-row">
+      <div class="sn-adv-stats-row-label">AI Visibility</div>
+      <div class="sn-adv-stats-grid">
+        <div class="sn-adv-stat"><div class="sn-adv-stat-num">2M+</div><div class="sn-adv-stat-label">AI Crawls / Month</div><div class="sn-adv-stat-sub">GPTBot, ClaudeBot, PerplexityBot, Amazonbot et al.</div></div>
+        <div class="sn-adv-stat"><div class="sn-adv-stat-num">170K+</div><div class="sn-adv-stat-label">ChatGPT-User Hits / Month</div><div class="sn-adv-stat-sub">Real-time AI lookups citing StereoNET</div></div>
+        <div class="sn-adv-stat"><div class="sn-adv-stat-num">11K+</div><div class="sn-adv-stat-label">PerplexityBot Crawls / Month</div><div class="sn-adv-stat-sub">Plus dedicated grounding traffic</div></div>
+        <div class="sn-adv-stat"><div class="sn-adv-stat-num">1.8K+</div><div class="sn-adv-stat-label">Click-throughs from AI Chats</div><div class="sn-adv-stat-sub">Humans arriving via ChatGPT, Perplexity, Claude…</div></div>
+      </div>
+    </div>
+
+    <p class="sn-adv-stats-footnote"><sup>*</sup> Actual human traffic only — bots filtered. Source data: Google Analytics 4 (audience), Cloudflare (AI bot traffic).</p>
+  </section>
+
+  <!-- ─── Research sources chart ──────────────────────────────────────── -->
+  <section class="sn-adv-section">
+    <h2>Where audiophiles <span class="accent">actually research purchases</span></h2>
+    <p class="section-lede">Print collapsed. Reddit and AI didn't register. Our audience comes to hi-fi websites and forums — <strong class="accent">and we own both</strong>.</p>
+    <div class="sn-adv-research">
+      <div class="sn-adv-highlight">
+        <div class="sn-adv-highlight-pct">37%</div>
+        <div class="sn-adv-highlight-label">of audiophiles rely on hi-fi websites + forums as their primary purchase research source</div>
+      </div>
+      <div class="sn-adv-bars">
+        <div class="sn-adv-bar-row sn-adv-bar-hl">
+          <div class="sn-adv-bar-name">Hi-fi websites &amp; online publications</div>
+          <div class="sn-adv-bar-track"><div class="sn-adv-bar-fill" style="width:100%"></div></div>
+          <div class="sn-adv-bar-pct">20%</div>
+        </div>
+        <div class="sn-adv-bar-row sn-adv-bar-hl">
+          <div class="sn-adv-bar-name">Forums &amp; online communities</div>
+          <div class="sn-adv-bar-track"><div class="sn-adv-bar-fill" style="width:85%"></div></div>
+          <div class="sn-adv-bar-pct">17%</div>
+        </div>
+        <div class="sn-adv-bar-row">
+          <div class="sn-adv-bar-name">YouTube channels / video reviews</div>
+          <div class="sn-adv-bar-track"><div class="sn-adv-bar-fill" style="width:60%"></div></div>
+          <div class="sn-adv-bar-pct">12%</div>
+        </div>
+        <div class="sn-adv-bar-row">
+          <div class="sn-adv-bar-name">Hi-fi shops &amp; dealer demos</div>
+          <div class="sn-adv-bar-track"><div class="sn-adv-bar-fill" style="width:60%"></div></div>
+          <div class="sn-adv-bar-pct">12%</div>
+        </div>
+        <div class="sn-adv-bar-row">
+          <div class="sn-adv-bar-name">Manufacturer websites</div>
+          <div class="sn-adv-bar-track"><div class="sn-adv-bar-fill" style="width:45%"></div></div>
+          <div class="sn-adv-bar-pct">9%</div>
+        </div>
+        <div class="sn-adv-bar-row">
+          <div class="sn-adv-bar-name">Friends, family, colleagues</div>
+          <div class="sn-adv-bar-track"><div class="sn-adv-bar-fill" style="width:30%"></div></div>
+          <div class="sn-adv-bar-pct">6%</div>
+        </div>
+        <div class="sn-adv-bar-row">
+          <div class="sn-adv-bar-name">Print magazines</div>
+          <div class="sn-adv-bar-track"><div class="sn-adv-bar-fill" style="width:20%"></div></div>
+          <div class="sn-adv-bar-pct">4%</div>
+        </div>
+        <div class="sn-adv-bar-row">
+          <div class="sn-adv-bar-name">Measurements sites (ASR etc.)</div>
+          <div class="sn-adv-bar-track"><div class="sn-adv-bar-fill" style="width:20%"></div></div>
+          <div class="sn-adv-bar-pct">4%</div>
+        </div>
+        <div class="sn-adv-bar-row">
+          <div class="sn-adv-bar-name">AI tools (ChatGPT, Perplexity)</div>
+          <div class="sn-adv-bar-track"><div class="sn-adv-bar-fill" style="width:10%"></div></div>
+          <div class="sn-adv-bar-pct">2%</div>
+        </div>
+        <div class="sn-adv-bar-row">
+          <div class="sn-adv-bar-name">Reddit</div>
+          <div class="sn-adv-bar-track"><div class="sn-adv-bar-fill" style="width:5%"></div></div>
+          <div class="sn-adv-bar-pct">1%</div>
+        </div>
+        <div class="sn-adv-bar-row">
+          <div class="sn-adv-bar-name">Social media (IG, TikTok, FB, X)</div>
+          <div class="sn-adv-bar-track"><div class="sn-adv-bar-fill" style="width:5%"></div></div>
+          <div class="sn-adv-bar-pct">1%</div>
+        </div>
+      </div>
+      <p class="sn-adv-research-note">StereoNET Reader Survey, May 2026. n=540 active forum members. Question: "Today, when researching a hi-fi purchase, which sources do you rely on most?"</p>
+    </div>
+  </section>
+
+  <!-- ─── Audience 3-column ───────────────────────────────────────────── -->
+  <section class="sn-adv-section">
+    <h2>The audience that <span class="accent">actually buys</span></h2>
+    <p class="section-lede">A global readership of decades-deep audiophiles — the buyers who fund the audio industry. Established, affluent, and ready to spend on serious gear.</p>
+    <div class="sn-adv-audience">
+      <div class="sn-adv-audience-col">
+        <h3>By Region</h3>
+        <ul>
+          <li><strong>38%</strong> Asia</li>
+          <li><strong>26%</strong> UK &amp; Europe</li>
+          <li><strong>21%</strong> North America</li>
+          <li><strong>13%</strong> Australia &amp; New Zealand</li>
+          <li>Genuinely global — 80+ markets monthly</li>
+        </ul>
+      </div>
+      <div class="sn-adv-audience-col">
+        <h3>By Experience</h3>
+        <ul>
+          <li><strong>86%</strong> in the hobby 20+ years</li>
+          <li><strong>93%</strong> in the hobby 10+ years</li>
+          <li><strong>93%</strong> aged 45+</li>
+          <li>Multi-system households</li>
+          <li>Decades of brand loyalty &amp; influence</li>
+        </ul>
+      </div>
+      <div class="sn-adv-audience-col">
+        <h3>By Behaviour</h3>
+        <ul>
+          <li><strong>100K+</strong> active forum community</li>
+          <li><strong>1m 54s</strong> avg. time on site (GA4)</li>
+          <li>Active in classifieds &amp; reviews daily</li>
+          <li>Peak discretionary-spending years</li>
+          <li>The trusted voice they buy from</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Partnership menu ───────────────────────────────────────────── -->
+  <section class="sn-adv-section">
+    <h2 id="sn-adv-partnership-heading">What partnership <span class="accent">looks like</span></h2>
+    <p class="section-lede" id="sn-adv-partnership-lede">Eight ways to put your brand in front of audiophiles who are ready to buy. Mix and match — or speak with us about a custom package.</p>
+    <div class="sn-adv-menu">
+      <div class="sn-adv-menu-item">
+        <div class="sn-adv-menu-num">01</div>
+        <div class="sn-adv-menu-text"><strong>Editorial coverage</strong><p>News, reviews, features, and opinion. Long-form trust-building from a team that knows hi-fi.</p></div>
+      </div>
+      <div class="sn-adv-menu-item">
+        <div class="sn-adv-menu-num">02</div>
+        <div class="sn-adv-menu-text"><strong>Display advertising</strong><p>Region-targeted Billboard, HPU, and MREC banners served via Broadstreet across the site.</p></div>
+      </div>
+      <div class="sn-adv-menu-item">
+        <div class="sn-adv-menu-num">03</div>
+        <div class="sn-adv-menu-text"><strong>Forum sponsorship</strong><p>Branded categories and topics in our 100K+ community of audiophile buyers.</p></div>
+      </div>
+      <div class="sn-adv-menu-item">
+        <div class="sn-adv-menu-num">04</div>
+        <div class="sn-adv-menu-text"><strong>Newsletter &amp; EDM</strong><p>Dedicated sends and integrated sponsorship to our opt-in subscriber list.</p></div>
+      </div>
+      <div class="sn-adv-menu-item">
+        <div class="sn-adv-menu-num">05</div>
+        <div class="sn-adv-menu-text"><strong>Social campaigns</strong><p>Native posts and reels across our 4.7M-reach social network. APAC + UK + US.</p></div>
+      </div>
+      <div class="sn-adv-menu-item">
+        <div class="sn-adv-menu-num">06</div>
+        <div class="sn-adv-menu-text"><strong>Classifieds presence</strong><p>Featured listings and sponsor placement on our second-hand marketplace.</p></div>
+      </div>
+      <div class="sn-adv-menu-item">
+        <div class="sn-adv-menu-num">07</div>
+        <div class="sn-adv-menu-text"><strong>Brand &amp; distributor packages</strong><p>Complete coverage bundles for manufacturers and regional distributors.</p></div>
+      </div>
+      <div class="sn-adv-menu-item">
+        <div class="sn-adv-menu-num">08</div>
+        <div class="sn-adv-menu-text"><strong>AI discoverability</strong><p>Schema markup, AI-training visibility, and structured data so your brand shows up in AI-powered shopping research. No other hi-fi publisher offers this.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Powered by PULSE ───────────────────────────────────────────── -->
+  <section class="sn-adv-section">
+    <div class="sn-adv-pulse">
+      <div class="sn-adv-pulse-eyebrow">Powered by PULSE</div>
+      <h2>Two decades of data. Cutting-edge AI. One audience intelligence engine.</h2>
+      <p>Every StereoNET campaign is informed by PULSE — our first-party audience intelligence platform. Developed and refined over two decades and now leveraging cutting-edge AI, PULSE turns live GA4 traffic, Search Console intent data, brand mention tracking, forum sentiment, and classifieds value flow into real-time insight.</p>
+      <p>PULSE is also the brains behind <a href="https://radar.stereonet.com" target="_blank" rel="noopener" class="sn-adv-pulse-link">RADAR</a> — one of the most sophisticated audio pricing engines online, tracking thousands of audio products across the global second-hand market with condition-based pricing models.</p>
+      <p>No other audio publisher delivers a campaign with this much signal behind it. Your custom Media Kit pulls live numbers from PULSE the moment you request it.</p>
+    </div>
+  </section>
+
+  <!-- ─── Request form ──────────────────────────────────────────────── -->
+  <section id="request" class="sn-adv-section">
+    <div class="sn-adv-form-wrap">
+      <h2>Request your <span class="accent">Media Kit</span></h2>
+      <p class="section-lede">Tell us a little about your brand and what you're looking to achieve. Our team will get in touch within one business day with a Media Kit tailored to your needs.</p>
+
+      <form class="sn-adv-form" id="sn-adv-form" autocomplete="on" novalidate>
+        <div class="sn-adv-form-row two">
+          <div>
+            <label for="sn-name">Name <span class="req">*</span></label>
+            <input type="text" id="sn-name" name="name" required maxlength="100">
+          </div>
+          <div>
+            <label for="sn-company">Company <span class="req">*</span></label>
+            <input type="text" id="sn-company" name="company" required maxlength="100">
+          </div>
+        </div>
+
+        <div class="sn-adv-form-row two">
+          <div>
+            <label for="sn-role">Your role</label>
+            <input type="text" id="sn-role" name="role" maxlength="80" placeholder="e.g. Marketing Director">
+          </div>
+          <div>
+            <label for="sn-email">Email <span class="req">*</span></label>
+            <input type="email" id="sn-email" name="email" required maxlength="120">
+          </div>
+        </div>
+
+        <div class="sn-adv-form-row two">
+          <div>
+            <label for="sn-company-type">Type of company <span class="req">*</span></label>
+            <select id="sn-company-type" name="company_type" required>
+              <option value="">— Select —</option>
+              <option value="manufacturer">Manufacturer</option>
+              <option value="distributor">Distributor</option>
+              <option value="retailer">Retailer</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label for="sn-country">Country <span class="req">*</span></label>
+            <select id="sn-country" name="country" required>
+            <option value="">— Select your country —</option>
+            <option value="Australia">Australia</option>
+            <option value="New Zealand">New Zealand</option>
+            <option value="United Kingdom">United Kingdom</option>
+            <option value="Ireland">Ireland</option>
+            <option value="United States">United States</option>
+            <option value="Canada">Canada</option>
+            <option value="Germany">Germany</option>
+            <option value="France">France</option>
+            <option value="Italy">Italy</option>
+            <option value="Spain">Spain</option>
+            <option value="Netherlands">Netherlands</option>
+            <option value="Belgium">Belgium</option>
+            <option value="Switzerland">Switzerland</option>
+            <option value="Austria">Austria</option>
+            <option value="Sweden">Sweden</option>
+            <option value="Norway">Norway</option>
+            <option value="Denmark">Denmark</option>
+            <option value="Finland">Finland</option>
+            <option value="Poland">Poland</option>
+            <option value="Singapore">Singapore</option>
+            <option value="Malaysia">Malaysia</option>
+            <option value="Thailand">Thailand</option>
+            <option value="Indonesia">Indonesia</option>
+            <option value="Philippines">Philippines</option>
+            <option value="Vietnam">Vietnam</option>
+            <option value="Japan">Japan</option>
+            <option value="South Korea">South Korea</option>
+            <option value="Hong Kong">Hong Kong</option>
+            <option value="Taiwan">Taiwan</option>
+            <option value="China">China</option>
+            <option value="India">India</option>
+            <option value="UAE">United Arab Emirates</option>
+            <option value="Mexico">Mexico</option>
+            <option value="Brazil">Brazil</option>
+            <option value="South Africa">South Africa</option>
+            <option value="Other">Other / not listed</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label for="sn-region">Region of interest <span class="req">*</span></label>
+          <select id="sn-region" name="region" required>
+            <option value="">— Where will you be focusing? —</option>
+            <option value="anz">Australia / New Zealand</option>
+            <option value="uk_eu">United Kingdom &amp; Europe</option>
+            <option value="na">North America</option>
+            <option value="asia">Asia</option>
+            <option value="global">All (Global)</option>
+          </select>
+        </div>
+
+        <div>
+          <label>What are you interested in? <span class="req">*</span></label>
+          <div class="sn-adv-interests">
+            <label class="sn-adv-interest"><input type="checkbox" name="interests" value="news"> News &amp; PR coverage</label>
+            <label class="sn-adv-interest"><input type="checkbox" name="interests" value="reviews"> Editorial reviews</label>
+            <label class="sn-adv-interest"><input type="checkbox" name="interests" value="banners"> Display banners</label>
+            <label class="sn-adv-interest"><input type="checkbox" name="interests" value="forum"> Forum sponsorship</label>
+            <label class="sn-adv-interest"><input type="checkbox" name="interests" value="newsletter"> Newsletter &amp; EDM</label>
+            <label class="sn-adv-interest"><input type="checkbox" name="interests" value="social"> Social campaigns</label>
+            <label class="sn-adv-interest"><input type="checkbox" name="interests" value="classifieds"> Classifieds presence</label>
+            <label class="sn-adv-interest"><input type="checkbox" name="interests" value="brand"> Brand / distributor package</label>
+            <label class="sn-adv-interest"><input type="checkbox" name="interests" value="ai"> AI discoverability</label>
+            <label class="sn-adv-interest"><input type="checkbox" name="interests" value="other"> Something else</label>
+          </div>
+        </div>
+
+        <div>
+          <label for="sn-message">Tell us about your brand</label>
+          <textarea id="sn-message" name="message" maxlength="1500" placeholder="What's your product, your timing, and what success looks like?"></textarea>
+        </div>
+
+        <!-- Anti-spam honeypot — humans don't fill this -->
+        <div class="sn-adv-honey" aria-hidden="true">
+          <label for="sn-website">Website</label>
+          <input type="text" id="sn-website" name="website" tabindex="-1" autocomplete="off">
+        </div>
+
+        <div class="sn-adv-submit-row">
+          <button type="submit" class="sn-adv-btn-primary" id="sn-submit-btn">Request Media Kit</button>
+          <span class="muted" style="font-size:12px;">Replies within one business day</span>
+        </div>
+
+        <div id="sn-form-result" class="sn-adv-form-result" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function() {
+  var form = document.getElementById('sn-adv-form');
+  var btn = document.getElementById('sn-submit-btn');
+  var result = document.getElementById('sn-form-result');
+  var renderedAt = Date.now();
+
+  if (!form) return;
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    result.className = 'sn-adv-form-result';
+    result.innerHTML = '';
+
+    // Collect interests checkboxes
+    var interests = [];
+    var checks = form.querySelectorAll('input[name="interests"]:checked');
+    for (var i = 0; i < checks.length; i++) interests.push(checks[i].value);
+
+    if (interests.length === 0) {
+      result.className = 'sn-adv-form-result error';
+      result.innerHTML = 'Please tick at least one item under "What are you interested in?"';
+      return;
+    }
+
+    var payload = {
+      name: form.elements['name'].value.trim(),
+      company: form.elements['company'].value.trim(),
+      company_type: form.elements['company_type'].value,
+      role: form.elements['role'].value.trim(),
+      country: form.elements['country'].value,
+      region: form.elements['region'].value, // explicit region of interest (overrides country inference)
+      email: form.elements['email'].value.trim(),
+      message: form.elements['message'].value.trim(),
+      interests: interests,
+      website: form.elements['website'].value, // honeypot
+      rendered_at: renderedAt
+    };
+
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    fetch('https://dashboard.stereonet.com/api/media-kit/request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(function(resp) { return resp.json().then(function(j) { return { status: resp.status, body: j }; }); })
+    .then(function(r) {
+      if (r.body.ok) {
+        result.className = 'sn-adv-form-result success';
+        result.innerHTML = '<strong>Thanks \u2014 we\u2019ve received your request.</strong><br>Our team will be in touch within one business day with a Media Kit tailored to your brand.';
+        form.reset();
+        btn.style.display = 'none';
+      } else {
+        result.className = 'sn-adv-form-result error';
+        result.innerHTML = r.body.message || 'Something went wrong. Please try again or email marcrushton@stereonet.com.';
+        btn.disabled = false;
+        btn.textContent = 'Send My Media Kit';
+      }
+    })
+    .catch(function(err) {
+      result.className = 'sn-adv-form-result error';
+      result.innerHTML = 'Network error. Please try again, or email marcrushton@stereonet.com directly.';
+      btn.disabled = false;
+      btn.textContent = 'Send My Media Kit';
+    });
+  });
+})();
+</script>
+  <footer class="sn-site-footer">
+    <a href="https://www.stereonet.com">Back to StereoNET</a>
+  </footer>
+
+  <!-- Live partnership menu: pulls editable items from PULSE settings, falls back to hardcoded HTML above -->
+  <script>
+  (function(){
+    function esc(s){return String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+    fetch('/api/public/partnership-menu')
+      .then(function(r){return r.ok ? r.json() : null;})
+      .then(function(j){
+        if (!j) return;
+        // Heading override: accent the last word for consistent styling
+        if (typeof j.heading === 'string' && j.heading.trim()) {
+          var h = document.getElementById('sn-adv-partnership-heading');
+          if (h) {
+            var t = j.heading.trim();
+            var i = t.lastIndexOf(' ');
+            if (i < 0) h.innerHTML = '<span class="accent">' + esc(t) + '</span>';
+            else h.innerHTML = esc(t.slice(0, i)) + ' <span class="accent">' + esc(t.slice(i + 1)) + '</span>';
+          }
+        }
+        // Subheading / lede override
+        if (typeof j.subheading === 'string') {
+          var p = document.getElementById('sn-adv-partnership-lede');
+          if (p) p.textContent = j.subheading;
+        }
+        if (!Array.isArray(j.items) || j.items.length === 0) return;
+        var menu = document.querySelector('.sn-adv-menu');
+        if (!menu) return;
+        menu.innerHTML = j.items.map(function(it, i){
+          var n = String(i + 1).padStart(2, '0');
+          return '<div class="sn-adv-menu-item">' +
+                   '<div class="sn-adv-menu-num">' + n + '</div>' +
+                   '<div class="sn-adv-menu-text"><strong>' + esc(it.title) + '</strong><p>' + esc(it.body) + '</p></div>' +
+                 '</div>';
+        }).join('');
+      })
+      .catch(function(){});
+  })();
+  </script>
+</body>
+</html>
