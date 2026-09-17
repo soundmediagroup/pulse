@@ -106,7 +106,7 @@ export function restampKitFromProposal(proposalId: number, opts: { force?: boole
     // Parse regions list from pitch_proposals.regions_json (empty array / all 4 = Global).
     let regions: string[] = [];
     try { regions = JSON.parse(prop.regions_json || "[]"); } catch { regions = []; }
-    const REGION_LABELS: Record<string, string> = { anz: "Australia & NZ", na: "North America", "uk-eu": "UK & Europe", asia: "Southeast Asia" };
+    const REGION_LABELS: Record<string, string> = { anz: "Australia & NZ", na: "North America", uk_eu: "UK & Europe", asia: "Southeast Asia" };
     const isGlobal = regions.length === 0 || regions.length === 4;
     const regionsScopeLabel = isGlobal ? "Global — all four regions" : regions.map(r => REGION_LABELS[r] || r).join(" + ");
     const regionLabels = isGlobal ? ["Australia & NZ", "North America", "UK & Europe", "Southeast Asia"] : regions.map(r => REGION_LABELS[r] || r);
@@ -1694,7 +1694,7 @@ export function registerPitchRoutes(app: Express) {
       // 4. Stamp the proposal block on the clone with everything the viewer needs.
       // Region-scope labels are computed once here and again in restampKitFromProposal
       // so that prospects always see whether the campaign is Global or scoped.
-      const REGION_LABELS_LOCAL: Record<string, string> = { anz: "Australia & NZ", na: "North America", "uk-eu": "UK & Europe", asia: "Southeast Asia" };
+      const REGION_LABELS_LOCAL: Record<string, string> = { anz: "Australia & NZ", na: "North America", uk_eu: "UK & Europe", asia: "Southeast Asia" };
       const proposalRegions: string[] = Array.isArray(proposalRow.regions) ? proposalRow.regions : [];
       const isGlobalCreate = proposalRegions.length === 0 || proposalRegions.length === 4;
       const regionsScopeLabelCreate = isGlobalCreate ? "Global — all four regions" : proposalRegions.map((r: string) => REGION_LABELS_LOCAL[r] || r).join(" + ");
