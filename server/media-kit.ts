@@ -1671,6 +1671,24 @@ export function registerMediaKitRoutes(app: Express) {
         // (this is the primary owner for Quick Send shares which have no lead).
         const creator = sqlite.prepare(`SELECT u.email FROM media_kit_shares s LEFT JOIN users u ON u.id = s.created_by WHERE s.id = ?`).get(opts.share_id) as any;
         if (creator?.email) recipients.add(String(creator.email).trim());
+        // Always honor the explicit "Notify on accept / decline" list set on the
+        // pitch_proposals row this kit was created from, if any. This is a
+        // proposal-specific override the user typed in on the Pitch editor —
+        // it must not depend on notify_regions matching, or on a linked
+        // pitch_inbound_leads row existing (wizard-created proposals have
+        // neither, so region silently fell back to "global" and these
+        // explicit addresses were dropped entirely — confirmed missing
+        // Justin Bird's notification on the Monitor Audio acceptance,
+        // 18 Sep 2026 — fixed here rather than in each of the 4 call sites).
+        try {
+          const linkedProposal = sqlite.prepare(`SELECT notify_emails_json FROM pitch_proposals WHERE media_kit_share_id = ? LIMIT 1`).get(opts.share_id) as any;
+          const notifyEmails: string[] = linkedProposal?.notify_emails_json ? JSON.parse(linkedProposal.notify_emails_json) : [];
+          for (const e of notifyEmails) {
+            if (e && String(e).trim()) recipients.add(String(e).trim());
+          }
+        } catch (e) {
+          console.warn("[proposal] failed to merge proposal notify_emails:", e);
+        }
         // marcrushton@ is added automatically as a BCC by sendEmail; don't duplicate it here.
         const { sendEmail, renderTemplate, EMAIL_TEMPLATES } = await import("./email");
         const def = (EMAIL_TEMPLATES as any)[opts.template_key];
