@@ -1987,6 +1987,42 @@ export async function registerRoutes(httpServer: Server, app: Express) {
       return res.json({ ok: true, op: "test-lead-notify", region, apiKeyPresent, fromEmail, matched_users: matched, recipients: Array.from(recipients), sendResult });
     }
 
+    // Resend an accept/decline/changes-requested/proposal-requested notification
+    // for a share whose event already fired but whose recipients missed it —
+    // e.g. because of the notify_emails_json fan-out gap fixed 18 Sep 2026
+    // (see notifyLeadOwners in media-kit.ts). Reads real acceptance/decline
+    // data off the share row rather than trusting caller-supplied vars, so
+    // this can't be used to send an arbitrary fabricated notification.
+    if (!req.file && req.body?.op === "resend-proposal-event-notify") {
+      const shareId = Number(req.body?.share_id || 0);
+      const toOverride = String(req.body?.to || "").trim();
+      if (!shareId) return res.status(400).json({ ok: false, message: "share_id required" });
+      const share = sqlite.prepare(`SELECT * FROM media_kit_shares WHERE id = ?`).get(shareId) as any;
+      if (!share) return res.status(404).json({ ok: false, message: "share not found" });
+      let templateKey: string; let vars: Record<string, any>;
+      const dashboard_link = "https://dashboard.stereonet.com/pitch";
+      if (share.proposal_state === "accepted") {
+        templateKey = "admin_proposal_accepted";
+        vars = { name: share.accepted_by_name, email: share.accepted_by_email || share.prospect_email || "(not provided)", company: share.prospect_company || share.acceptance_billing_company || "", accepted_at: share.accepted_at, dashboard_link };
+      } else if (share.proposal_state === "declined") {
+        templateKey = "admin_proposal_declined";
+        vars = { name: share.prospect_name || "Prospect", email: share.prospect_email || "(not provided)", company: share.prospect_company || "", reason: "", dashboard_link };
+      } else {
+        return res.status(400).json({ ok: false, message: `share proposal_state is '${share.proposal_state}', not accepted/declined \u2014 nothing to resend` });
+      }
+      const toList = toOverride ? toOverride.split(",").map(s => s.trim()).filter(Boolean) : [];
+      if (toList.length === 0) return res.status(400).json({ ok: false, message: "to (comma-separated emails) required" });
+      const { sendEmail, renderTemplate, EMAIL_TEMPLATES } = await import("./email");
+      const def = (EMAIL_TEMPLATES as any)[templateKey];
+      const { subject, html } = renderTemplate(def, vars);
+      const results: any[] = [];
+      for (const to of toList) {
+        const r = await sendEmail({ to, subject, html });
+        results.push({ to, ok: r.ok, error: r.error });
+      }
+      return res.json({ ok: true, op: "resend-proposal-event-notify", share_id: shareId, template_key: templateKey, vars, results });
+    }
+
     // Piggy-back ops: SELECT-only SQL read, allowlisted to pitch_* and users.
     if (!req.file && req.body?.op === "sql") {
       const q = String(req.body?.q || "").trim();
