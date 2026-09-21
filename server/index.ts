@@ -259,6 +259,7 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
   if (req.path === "/api/ingest/attachment") return next(); // Webhook handles its own auth via x-webhook-token
   if (req.path === "/api/retailers/ingest") return next(); // PULSE retailer tracking ingest — token + rate limit checked in route handler
   if (req.path === "/api/fx-rates") return next(); // Public FX rates feed for media kit currency selector
+  if (req.path.startsWith("/api/public/")) return next(); // Public read-only marketing data (no PII) — audience-stats, partnership-menu, etc.
   if (req.path.startsWith("/uploads/")) return next(); // Public static files (sha256-addressed, no PII)
   if (req.path.startsWith("/api/admin/diag/") && (req.headers["x-deploy-token"] || req.query.token)) return next(); // Diag endpoints handle token check inline
   if (req.path === "/api/filter-keywords" && req.method === "GET" && (req.headers["x-deploy-token"] || req.query.token)) return next(); // GET allowed via deploy token for diagnostics
