@@ -285,8 +285,8 @@
     <div class="sn-adv-stats-row">
       <div class="sn-adv-stats-row-label">Audience Quality</div>
       <div class="sn-adv-stats-grid">
-        <div class="sn-adv-stat"><div class="sn-adv-stat-num">590K+<sup>*</sup></div><div class="sn-adv-stat-label">Monthly Human Visitors</div><div class="sn-adv-stat-sub">Bots removed · GA4 verified</div></div>
-        <div class="sn-adv-stat"><div class="sn-adv-stat-num">1.3M+</div><div class="sn-adv-stat-label">Human Page Views / Month</div><div class="sn-adv-stat-sub">Bots removed · GA4 verified</div></div>
+        <div class="sn-adv-stat"><div class="sn-adv-stat-num" id="sn-adv-stat-visitors">590K+<sup>*</sup></div><div class="sn-adv-stat-label">Monthly Human Visitors</div><div class="sn-adv-stat-sub">Bots removed · GA4 verified</div></div>
+        <div class="sn-adv-stat"><div class="sn-adv-stat-num" id="sn-adv-stat-pageviews">1.3M+</div><div class="sn-adv-stat-label">Human Page Views / Month</div><div class="sn-adv-stat-sub">Bots removed · GA4 verified</div></div>
         <div class="sn-adv-stat"><div class="sn-adv-stat-num">86%</div><div class="sn-adv-stat-label">In Hobby 20+ Years</div><div class="sn-adv-stat-sub">StereoNET Reader Survey, May 2026</div></div>
         <div class="sn-adv-stat"><div class="sn-adv-stat-num">#11</div><div class="sn-adv-stat-label">Similarweb Global Rank</div><div class="sn-adv-stat-sub">Consumer Electronics</div></div>
       </div>
@@ -706,6 +706,22 @@
                    '<div class="sn-adv-menu-text"><strong>' + esc(it.title) + '</strong><p>' + esc(it.body) + '</p></div>' +
                  '</div>';
         }).join('');
+      })
+      .catch(function(){});
+  })();
+
+  // Live canonical audience stats — same source of truth as the press-releases
+  // page and new PITCH media kits. Static numbers above are the fallback if
+  // this fetch fails, so the page never shows a broken/blank stat.
+  (function(){
+    fetch('/api/public/audience-stats', { cache: 'no-store' })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(j){
+        if (!j || !j.ok) return;
+        var v = document.getElementById('sn-adv-stat-visitors');
+        var p = document.getElementById('sn-adv-stat-pageviews');
+        if (v && j.monthly_visitors_fmt) v.innerHTML = j.monthly_visitors_fmt + '<sup>*</sup>';
+        if (p && j.monthly_pageviews_fmt) p.textContent = j.monthly_pageviews_fmt;
       })
       .catch(function(){});
   })();

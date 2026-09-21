@@ -6,7 +6,7 @@ import crypto from "node:crypto";
 import multer from "multer";
 import { sqlite, storage } from "./storage";
 import { cfg } from "./config";
-import { fetchGA4Overview, BOT_COUNTRIES, fetchSCQueriesForBrand } from "./analytics";
+import { fetchGA4Overview, fetchGA4Countries, BOT_COUNTRIES, fetchSCQueriesForBrand } from "./analytics";
 import { saveAttachment } from "./attachments";
 
 const logoUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
@@ -1006,6 +1006,81 @@ async function getAudienceSnapshot(regions: string[] = []): Promise<AudienceSnap
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Canonical site-wide audience stats — the ONE number used across the public
+// advertising page (dashboard.stereonet.com/advertising), the press-releases
+// page (stereonet.com), and new PITCH media-kit defaults. Sourced straight
+// from GA4 with GA4's own native bot filtering only — deliberately does NOT
+// apply the crude BOT_COUNTRIES (Singapore/China/Hong Kong) exclusion used
+// elsewhere in this file for per-brand proposals, since that drops real
+// readers from real markets, not bots (confirmed decision: Marc, 21 Sep 2026).
+// Cached 1h, refreshed on read.
+// ─────────────────────────────────────────────────────────────────────────────
+type CanonicalAudienceStats = {
+  period_label: string;
+  period_days: number;
+  as_of: string;
+  monthly_visitors: number;
+  monthly_sessions: number;
+  monthly_pageviews: number;
+  avg_session_seconds: number;
+  avg_session_label: string;
+  countries_reached: number;
+  monthly_visitors_fmt: string;
+  monthly_pageviews_fmt: string;
+  methodology: string;
+} | null;
+
+let canonicalStatsCache: { ts: number; data: CanonicalAudienceStats } | null = null;
+let lastCanonicalStatsError: string | null = null;
+export function getLastCanonicalStatsError() { return lastCanonicalStatsError; }
+
+export async function getCanonicalAudienceStats(forceRefresh = false): Promise<CanonicalAudienceStats> {
+  const now = Date.now();
+  if (!forceRefresh && canonicalStatsCache && (now - canonicalStatsCache.ts) < 60 * 60 * 1000) {
+    return canonicalStatsCache.data;
+  }
+  try {
+    const end = new Date(); end.setDate(end.getDate() - 1);
+    const start = new Date(end); start.setDate(start.getDate() - 29);
+    const fmt = (d: Date) => d.toISOString().slice(0, 10);
+    // No excludeCountries / includeCountries — GA4's own default bot filtering only.
+    const [overview, countries] = await Promise.all([
+      fetchGA4Overview(fmt(start), fmt(end)),
+      fetchGA4Countries(fmt(start), fmt(end), 250),
+    ]);
+    if (!overview) {
+      lastCanonicalStatsError = "GA4 returned null — see server logs.";
+      console.warn("[pitch] canonical audience stats: GA4 overview returned null");
+      return canonicalStatsCache?.data ?? null;
+    }
+    lastCanonicalStatsError = null;
+    const secs = Math.round(overview.avgSessionDuration || 0);
+    const mins = Math.floor(secs / 60);
+    const rem = secs % 60;
+    const data: CanonicalAudienceStats = {
+      period_label: "last 30 days",
+      period_days: 30,
+      as_of: fmt(end),
+      monthly_visitors: overview.activeUsers || 0,
+      monthly_sessions: overview.sessions || 0,
+      monthly_pageviews: overview.pageviews || 0,
+      avg_session_seconds: secs,
+      avg_session_label: `${mins}m ${String(rem).padStart(2, "0")}s`,
+      countries_reached: countries.filter((c: any) => c.users > 0).length,
+      monthly_visitors_fmt: formatCompact(overview.activeUsers || 0),
+      monthly_pageviews_fmt: formatCompact(overview.pageviews || 0),
+      methodology: "Google Analytics 4, rolling 30-day window, GA4 native bot filtering only.",
+    };
+    canonicalStatsCache = { ts: now, data };
+    return data;
+  } catch (e: any) {
+    lastCanonicalStatsError = e?.message || String(e);
+    console.error("[pitch] canonical audience stats failed:", e);
+    return canonicalStatsCache?.data ?? null;
+  }
+}
+
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1189,6 +1264,22 @@ export function registerPitchRoutes(app: Express) {
   backfillAIDiscoverabilityProposals();
   reorderTierTemplateItemsCanonical();
   reorderProposalLineItemsCanonical();
+
+  // Public, unauthenticated, read-only canonical audience stats — the single
+  // source of truth consumed live by advertising.html (dashboard.stereonet.com)
+  // and the stereonet.com press-releases page. CORS-open since it's read-only
+  // marketing data with no PII, fetched cross-origin from stereonet.com.
+  app.get("/api/public/audience-stats", async (req: any, res: any) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Cache-Control", "public, max-age=1800");
+    const force = req.query.force === "1" && (req.headers["x-deploy-token"] === cfg("DEPLOY_TOKEN", "sn-d3pl0y-x7Km9Rp4Wq2Yf8Bv"));
+    const data = await getCanonicalAudienceStats(force);
+    if (!data) {
+      return res.status(503).json({ ok: false, error: getLastCanonicalStatsError() || "unavailable" });
+    }
+    res.json({ ok: true, ...data });
+  });
+
   // Token-gated emergency grant — useful when bootstrap missed a user.
   app.post("/api/admin/diag/pitch-grant", (req: any, res) => {
     const token = req.headers["x-deploy-token"] || req.query.token;
