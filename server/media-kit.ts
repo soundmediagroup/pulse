@@ -194,10 +194,10 @@ function defaultAudienceGrid(): any {
   return {
     heading: "Our Audience",
     subheading: "the audiophiles who actually buy",
-    footer_note: "Sources: GA4 last 30 days · StereoNET Forum Survey n=540, May 2026 · Facebook Page Insights · Australian Bureau of Statistics",
+    footer_note: "Sources: GA4 last 30 days (live — see dashboard.stereonet.com/advertising for current figures) · StereoNET Forum Survey n=540, May 2026 · Facebook Page Insights · Australian Bureau of Statistics",
     tiles: [
-      { label: "Monthly readers", value: "700K+", note: "Active users, GA4 last 30 days" },
-      { label: "Monthly page views", value: "1.4M+", note: "GA4 last 30 days" },
+      { label: "Monthly readers", value: "690K+", note: "Active users, GA4 last 30 days — same canonical figure as the advertising page and press-releases page" },
+      { label: "Monthly page views", value: "1.4M+", note: "GA4 last 30 days — same canonical figure as the advertising page and press-releases page" },
       { label: "Active forum community", value: "100K+", note: "Decades-deep audiophiles posting daily — the trusted core no competitor can match" },
       { label: "Audience aged 45+", value: "93%", note: "Peak discretionary-spending years" },
       { label: "Avg. disposable income, 40-somethings (AU)", value: "$55K+", note: "The buyers ready to spend now" },
