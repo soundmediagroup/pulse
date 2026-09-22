@@ -13,6 +13,7 @@ import Analytics from "./pages/Analytics";
 import Pitch from "./pages/Pitch";
 import Leads from "./pages/Leads";
 import Retailers from "./pages/Retailers";
+import AskStereonet from "./pages/AskStereonet";
 // PitchPublic was retired in the PITCH ↔ Media Kit unification — the
 // /pitch/<slug> public viewer is gone; new proposals are viewed under
 // /kit/<slug>?t=... via MediaKitPublic, which handles the full Investment
@@ -57,6 +58,7 @@ function TabNav() {
     ...(hasRedline ? [{ path: "/redline", label: "Redline" }] : []),
     ...(isLoggedIn ? [{ path: "/pitch", label: "PITCH" }] : []),
     ...(isLoggedIn ? [{ path: "/retailers", label: "Retailers" }] : []),
+    ...(isLoggedIn ? [{ path: "/ask-stereonet", label: "Ask StereoNET" }] : []),
     ...(me?.role === "admin" ? [{ path: "/admin", label: "Admin" }] : []),
   ];
 
@@ -175,6 +177,7 @@ export default function App() {
               <Route path="/pitch" component={Pitch} />
               <Route path="/leads" component={Leads} />
               <Route path="/retailers" component={Retailers} />
+              <Route path="/ask-stereonet" component={AskStereonet} />
               <Route path="/media-kits" component={MediaKits} />
               <Route path="/admin" component={Admin} />
               <Route component={NotFound} />

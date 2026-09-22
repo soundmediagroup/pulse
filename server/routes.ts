@@ -16,6 +16,7 @@ import { registerPitchRoutes } from "./pitch";
 import { registerMediaKitRoutes } from "./media-kit";
 import { registerLeadsRoutes } from "./leads";
 import { registerRetailerRoutes } from "./retailers";
+import { registerAskStereonetRoutes } from "./ask-stereonet";
 import { registerDiscoveryLearningRoutes, ensureLearningSchema, learnCategoriesFromDismissals, rebuildPositiveBrands, clusterHotStories, computeSiteHealth, getActiveCategorySuppressions, getPositiveBrandsSet, getOpenHotClusters } from "./discovery-learning";
 import { ensurePrimarySourceSchema, seedPrimarySources, runAllPrimarySourceWatchers, runFccWatcher, runYoutubeWatcher, runBrandPressWatcher } from "./primary-source-watchers";
 import { getFxRates } from "./fx";
@@ -37,6 +38,7 @@ export async function registerRoutes(httpServer: Server, app: Express) {
   registerMediaKitRoutes(app);
   registerLeadsRoutes(app);
   registerRetailerRoutes(app);
+  registerAskStereonetRoutes(app);
 
   // Article Discovery learning system — site health, category learning,
   // positive brand signals, hot-story clustering, weekly digest.
