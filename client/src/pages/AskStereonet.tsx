@@ -15,6 +15,16 @@ interface QueryLogRow {
   backend: string;
   response_ms: number | null;
   sources: Source[];
+  feedback: "up" | "down" | null;
+}
+
+// Thumbs up/down feedback (added 23 Sep 2026, Jason Sexton's suggestion via
+// Marc). Purely additive against the upstream /api/stats response - the
+// server proxy above already spreads the whole payload through, so this
+// field just needs to exist on the interface and get rendered.
+interface FeedbackTally {
+  up: number;
+  down: number;
 }
 
 interface StatsResponse {
@@ -23,6 +33,7 @@ interface StatsResponse {
   avgResponseMsToday: number | null;
   byBackend: { backend: string; n: number }[];
   anthropicCapToday: { used: number; cap: number };
+  feedback: { allTime: FeedbackTally; last7Days: FeedbackTally };
   recent: QueryLogRow[];
   message?: string;
 }
@@ -119,6 +130,21 @@ export default function AskStereonet() {
                 />
               </div>
             </div>
+            <div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Feedback (last 7 days)</div>
+              <div className="flex gap-3 items-center">
+                <span className="text-sm">👍 {data.feedback.last7Days.up}</span>
+                <span className="text-sm">👎 {data.feedback.last7Days.down}</span>
+                <span className="text-xs text-muted-foreground">
+                  {data.feedback.last7Days.up + data.feedback.last7Days.down > 0
+                    ? `${Math.round((data.feedback.last7Days.up / (data.feedback.last7Days.up + data.feedback.last7Days.down)) * 100)}% positive`
+                    : "No votes yet"}
+                </span>
+                <span className="text-xs text-muted-foreground/60">
+                  (all time: 👍 {data.feedback.allTime.up} / 👎 {data.feedback.allTime.down})
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Recent query history */}
@@ -130,6 +156,7 @@ export default function AskStereonet() {
                     <th className="px-4 py-2">Time</th>
                     <th className="px-4 py-2">Question</th>
                     <th className="px-4 py-2">Backend</th>
+                    <th className="px-4 py-2 text-center">Feedback</th>
                     <th className="px-4 py-2 text-right">Response</th>
                   </tr>
                 </thead>
@@ -149,6 +176,9 @@ export default function AskStereonet() {
                             {l.text}
                           </span>
                         </td>
+                        <td className="px-4 py-2 text-center">
+                          {r.feedback === "up" ? "👍" : r.feedback === "down" ? "👎" : <span className="text-muted-foreground/40">—</span>}
+                        </td>
                         <td className="px-4 py-2 text-right mono text-muted-foreground">
                           {r.response_ms ? `${(r.response_ms / 1000).toFixed(1)}s` : "—"}
                         </td>
@@ -156,7 +186,7 @@ export default function AskStereonet() {
                     );
                   })}
                   {data.recent.length === 0 && (
-                    <tr><td colSpan={4} className="px-4 py-6 text-muted-foreground text-center">No queries yet</td></tr>
+                    <tr><td colSpan={5} className="px-4 py-6 text-muted-foreground text-center">No queries yet</td></tr>
                   )}
                 </tbody>
               </table>
