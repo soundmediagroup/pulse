@@ -16,6 +16,8 @@ interface QueryLogRow {
   response_ms: number | null;
   sources: Source[];
   feedback: "up" | "down" | null;
+  username: string | null;
+  tier: "Lite" | "Pro";
 }
 
 // Thumbs up/down feedback (added 23 Sep 2026, Jason Sexton's suggestion via
@@ -154,6 +156,7 @@ export default function AskStereonet() {
                 <thead className="sticky top-0 bg-background border-b border-border">
                   <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground">
                     <th className="px-4 py-2">Time</th>
+                    <th className="px-4 py-2">User</th>
                     <th className="px-4 py-2">Question</th>
                     <th className="px-4 py-2">Backend</th>
                     <th className="px-4 py-2 text-center">Feedback</th>
@@ -170,6 +173,18 @@ export default function AskStereonet() {
                         className={`border-b border-border/50 hover:bg-muted/50 cursor-pointer ${selected === r ? "bg-muted" : ""}`}
                       >
                         <td className="px-4 py-2 text-muted-foreground whitespace-nowrap">{fmtDate(r.ts)}</td>
+                        <td className="px-4 py-2 whitespace-nowrap">
+                          {r.username ? (
+                            <span className="flex items-center gap-1.5">
+                              {r.username}
+                              {r.tier === "Pro" && (
+                                <span className="text-[9px] uppercase tracking-wide px-1 py-0.5 rounded border bg-[#e8312a]/15 text-[#e8312a] border-[#e8312a]/30">Pro</span>
+                              )}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground/40">Anonymous</span>
+                          )}
+                        </td>
                         <td className="px-4 py-2 max-w-md truncate">{r.question}</td>
                         <td className="px-4 py-2">
                           <span className={`text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded border ${l.color}`}>
@@ -186,7 +201,7 @@ export default function AskStereonet() {
                     );
                   })}
                   {data.recent.length === 0 && (
-                    <tr><td colSpan={5} className="px-4 py-6 text-muted-foreground text-center">No queries yet</td></tr>
+                    <tr><td colSpan={6} className="px-4 py-6 text-muted-foreground text-center">No queries yet</td></tr>
                   )}
                 </tbody>
               </table>
@@ -199,7 +214,14 @@ export default function AskStereonet() {
                   <div className="text-xs uppercase tracking-wide text-muted-foreground">Detail</div>
                   <button className="text-xs text-muted-foreground hover:text-foreground" onClick={() => setSelected(null)}>Close</button>
                 </div>
-                <div className="text-xs text-muted-foreground mb-1">{fmtDate(selected.ts)}</div>
+                <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1.5">
+                  {fmtDate(selected.ts)}
+                  <span>&middot;</span>
+                  {selected.username || "Anonymous"}
+                  {selected.tier === "Pro" && (
+                    <span className="text-[9px] uppercase tracking-wide px-1 py-0.5 rounded border bg-[#e8312a]/15 text-[#e8312a] border-[#e8312a]/30">Pro</span>
+                  )}
+                </div>
                 <div className="font-medium mb-3">{selected.question}</div>
                 <div className="text-sm whitespace-pre-wrap mb-4">{selected.answer}</div>
                 {selected.sources?.length > 0 && (
