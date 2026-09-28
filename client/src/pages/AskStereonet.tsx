@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -18,6 +18,33 @@ interface QueryLogRow {
   feedback: "up" | "down" | null;
   username: string | null;
   tier: "Lite" | "Pro";
+  conversation_id: string | null;
+}
+
+// Conversation threading (added 28 Sep 2026, Marc's request - this was a
+// flat list with no way to tell a follow-up question apart from a brand
+// new, unrelated one). The widget sends one random conversation_id per
+// panel-open session with every question asked in it; group rows by that
+// id so a multi-turn conversation reads as one thread instead of N
+// unrelated-looking rows scattered by pure recency. Rows logged before
+// this shipped (or from a client that failed the beacon) have no
+// conversation_id - each of those is its own singleton "thread", not an
+// error case, since a null id has never been in the same conversation as
+// any other row.
+function groupIntoThreads(rows: QueryLogRow[]): QueryLogRow[][] {
+  const groups = new Map<string, QueryLogRow[]>();
+  let singletonSeq = 0;
+  for (const r of rows) {
+    const key = r.conversation_id || `__singleton_${singletonSeq++}`;
+    const g = groups.get(key);
+    if (g) g.push(r); else groups.set(key, [r]);
+  }
+  const threads = Array.from(groups.values()).map(g =>
+    [...g].sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime())
+  );
+  // Newest activity first, same ordering feel as the old flat list.
+  threads.sort((a, b) => new Date(b[b.length - 1].ts).getTime() - new Date(a[a.length - 1].ts).getTime());
+  return threads;
 }
 
 // Thumbs up/down feedback (added 23 Sep 2026, Jason Sexton's suggestion via
@@ -40,6 +67,8 @@ interface StatsResponse {
   message?: string;
 }
 
+const THREAD_RULE_COLOR = "border-[#e8312a]/30";
+
 function fmtDate(ts: string) {
   const d = new Date(ts);
   return d.toLocaleString("en-AU", { timeZone: "Australia/Melbourne", dateStyle: "short", timeStyle: "short" });
@@ -61,6 +90,7 @@ export default function AskStereonet() {
   });
 
   const capPct = data?.anthropicCapToday ? Math.round((data.anthropicCapToday.used / data.anthropicCapToday.cap) * 100) : 0;
+  const threads = data?.recent ? groupIntoThreads(data.recent) : [];
 
   return (
     <div className="flex flex-col h-full">
@@ -164,43 +194,53 @@ export default function AskStereonet() {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.recent.map((r, i) => {
-                    const l = backendLabel(r.backend);
-                    return (
-                      <tr
-                        key={i}
-                        onClick={() => setSelected(r)}
-                        className={`border-b border-border/50 hover:bg-muted/50 cursor-pointer ${selected === r ? "bg-muted" : ""}`}
-                      >
-                        <td className="px-4 py-2 text-muted-foreground whitespace-nowrap">{fmtDate(r.ts)}</td>
-                        <td className="px-4 py-2 whitespace-nowrap">
-                          {r.username ? (
-                            <span className="flex items-center gap-1.5">
-                              {r.username}
-                              {r.tier === "Pro" && (
-                                <span className="text-[9px] uppercase tracking-wide px-1 py-0.5 rounded border bg-[#e8312a]/15 text-[#e8312a] border-[#e8312a]/30">Pro</span>
+                  {threads.map((thread, ti) => (
+                    <Fragment key={thread[0].conversation_id ?? `s${ti}`}>
+                      {thread.map((r, ri) => {
+                        const l = backendLabel(r.backend);
+                        const isFollowup = ri > 0;
+                        return (
+                          <tr
+                            key={ri}
+                            onClick={() => setSelected(r)}
+                            className={`border-b border-border/50 hover:bg-muted/50 cursor-pointer ${selected === r ? "bg-muted" : ""} ${isFollowup ? "bg-muted/20" : ""}`}
+                          >
+                            <td className="px-4 py-2 text-muted-foreground whitespace-nowrap">{fmtDate(r.ts)}</td>
+                            <td className="px-4 py-2 whitespace-nowrap">
+                              {isFollowup ? (
+                                <span className="text-muted-foreground/40">&mdash;</span>
+                              ) : r.username ? (
+                                <span className="flex items-center gap-1.5">
+                                  {r.username}
+                                  {r.tier === "Pro" && (
+                                    <span className="text-[9px] uppercase tracking-wide px-1 py-0.5 rounded border bg-[#e8312a]/15 text-[#e8312a] border-[#e8312a]/30">Pro</span>
+                                  )}
+                                </span>
+                              ) : (
+                                <span className="text-muted-foreground/40">Anonymous</span>
                               )}
-                            </span>
-                          ) : (
-                            <span className="text-muted-foreground/40">Anonymous</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-2 max-w-md truncate">{r.question}</td>
-                        <td className="px-4 py-2">
-                          <span className={`text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded border ${l.color}`}>
-                            {l.text}
-                          </span>
-                        </td>
-                        <td className="px-4 py-2 text-center">
-                          {r.feedback === "up" ? "👍" : r.feedback === "down" ? "👎" : <span className="text-muted-foreground/40">—</span>}
-                        </td>
-                        <td className="px-4 py-2 text-right mono text-muted-foreground">
-                          {r.response_ms ? `${(r.response_ms / 1000).toFixed(1)}s` : "—"}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {data.recent.length === 0 && (
+                            </td>
+                            <td className={`px-4 py-2 max-w-md truncate ${isFollowup ? `pl-6 border-l-2 ${THREAD_RULE_COLOR}` : ""}`}>
+                              {isFollowup && <span className="text-muted-foreground/50 mr-1">&#8627;</span>}
+                              {r.question}
+                            </td>
+                            <td className="px-4 py-2">
+                              <span className={`text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded border ${l.color}`}>
+                                {l.text}
+                              </span>
+                            </td>
+                            <td className="px-4 py-2 text-center">
+                              {r.feedback === "up" ? "👍" : r.feedback === "down" ? "👎" : <span className="text-muted-foreground/40">—</span>}
+                            </td>
+                            <td className="px-4 py-2 text-right mono text-muted-foreground">
+                              {r.response_ms ? `${(r.response_ms / 1000).toFixed(1)}s` : "—"}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </Fragment>
+                  ))}
+                  {threads.length === 0 && (
                     <tr><td colSpan={6} className="px-4 py-6 text-muted-foreground text-center">No queries yet</td></tr>
                   )}
                 </tbody>
