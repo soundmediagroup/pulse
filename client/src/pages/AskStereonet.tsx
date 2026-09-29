@@ -9,6 +9,7 @@ interface Source {
 }
 
 interface QueryLogRow {
+  id: number;
   ts: string;
   question: string;
   answer: string;
@@ -19,6 +20,7 @@ interface QueryLogRow {
   username: string | null;
   tier: "Lite" | "Pro";
   conversation_id: string | null;
+  ip_hash: string | null;
 }
 
 // Conversation threading (added 28 Sep 2026, Marc's request - this was a
@@ -78,6 +80,32 @@ function backendLabel(backend: string) {
   if (backend.startsWith("anthropic/")) return { text: backend.replace("anthropic/", "Claude "), color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" };
   if (backend.includes("fallback")) return { text: backend.replace("gpubox/", "gpubox: "), color: "bg-amber-500/15 text-amber-400 border-amber-500/30" };
   return { text: backend.replace("gpubox/", "gpubox: "), color: "bg-zinc-500/10 text-zinc-400 border-zinc-500/30" };
+}
+
+// Anonymous-user IP grouping (added 29 Sep 2026, Marc's request). Anonymous
+// rows have no username; identify each by a short stable token derived from
+// the upstream's already-hashed (salted SHA-256, irreversible) IP so multiple
+// queries from the same anonymous IP read as one person/group instead of an
+// indistinguishable wall of "Anonymous". The raw dotted IP is never available
+// client-side - only the hash - so this token IS the grouping key, and each
+// gets a stable colour per IP so same-IP rows link at a glance across separate
+// conversation threads.
+function anonLabel(ipHash: string | null): string {
+  return ipHash ? `anon-${ipHash.slice(0, 6)}` : "anon-?";
+}
+const ANON_COLORS = [
+  "bg-sky-500/15 text-sky-400 border-sky-500/30",
+  "bg-violet-500/15 text-violet-400 border-violet-500/30",
+  "bg-amber-500/15 text-amber-400 border-amber-500/30",
+  "bg-teal-500/15 text-teal-400 border-teal-500/30",
+  "bg-pink-500/15 text-pink-400 border-pink-500/30",
+  "bg-lime-500/15 text-lime-400 border-lime-500/30",
+];
+function anonColor(ipHash: string | null): string {
+  if (!ipHash) return "bg-zinc-500/10 text-zinc-400 border-zinc-500/30";
+  let h = 0;
+  for (let i = 0; i < ipHash.length; i++) h = (h * 31 + ipHash.charCodeAt(i)) >>> 0;
+  return ANON_COLORS[h % ANON_COLORS.length];
 }
 
 export default function AskStereonet() {
@@ -205,7 +233,10 @@ export default function AskStereonet() {
                             onClick={() => setSelected(r)}
                             className={`border-b border-border/50 hover:bg-muted/50 cursor-pointer ${selected === r ? "bg-muted" : ""} ${isFollowup ? "bg-muted/20" : ""}`}
                           >
-                            <td className="px-4 py-2 text-muted-foreground whitespace-nowrap">{fmtDate(r.ts)}</td>
+                            <td className="px-4 py-2 text-muted-foreground whitespace-nowrap">
+                              <div>{fmtDate(r.ts)}</div>
+                              <div className="text-[10px] font-mono text-muted-foreground/50">#{r.id}</div>
+                            </td>
                             <td className="px-4 py-2 whitespace-nowrap">
                               {isFollowup ? (
                                 <span className="text-muted-foreground/40">&mdash;</span>
@@ -217,7 +248,12 @@ export default function AskStereonet() {
                                   )}
                                 </span>
                               ) : (
-                                <span className="text-muted-foreground/40">Anonymous</span>
+                                <span
+                                  className={`text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded border font-mono ${anonColor(r.ip_hash)}`}
+                                  title={r.ip_hash ? `Anonymous · same IP group: ${r.ip_hash}` : "Anonymous (no IP recorded)"}
+                                >
+                                  {anonLabel(r.ip_hash)}
+                                </span>
                               )}
                             </td>
                             <td className={`px-4 py-2 max-w-md truncate ${isFollowup ? `pl-6 border-l-2 ${THREAD_RULE_COLOR}` : ""}`}>
@@ -254,12 +290,24 @@ export default function AskStereonet() {
                   <div className="text-xs uppercase tracking-wide text-muted-foreground">Detail</div>
                   <button className="text-xs text-muted-foreground hover:text-foreground" onClick={() => setSelected(null)}>Close</button>
                 </div>
-                <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1.5">
+                <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1.5 flex-wrap">
+                  <span className="font-mono px-1.5 py-0.5 rounded border bg-muted text-foreground/80" title="Shareable query reference">#{selected.id}</span>
                   {fmtDate(selected.ts)}
                   <span>&middot;</span>
-                  {selected.username || "Anonymous"}
-                  {selected.tier === "Pro" && (
-                    <span className="text-[9px] uppercase tracking-wide px-1 py-0.5 rounded border bg-[#e8312a]/15 text-[#e8312a] border-[#e8312a]/30">Pro</span>
+                  {selected.username ? (
+                    <span className="flex items-center gap-1.5">
+                      {selected.username}
+                      {selected.tier === "Pro" && (
+                        <span className="text-[9px] uppercase tracking-wide px-1 py-0.5 rounded border bg-[#e8312a]/15 text-[#e8312a] border-[#e8312a]/30">Pro</span>
+                      )}
+                    </span>
+                  ) : (
+                    <span
+                      className={`font-mono px-1 py-0.5 rounded border ${anonColor(selected.ip_hash)}`}
+                      title={selected.ip_hash ? `Anonymous · same IP group: ${selected.ip_hash}` : "Anonymous (no IP recorded)"}
+                    >
+                      {anonLabel(selected.ip_hash)}
+                    </span>
                   )}
                 </div>
                 <div className="font-medium mb-3">{selected.question}</div>
