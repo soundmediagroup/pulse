@@ -104,9 +104,64 @@ async function scrapeHiFiPlus(): Promise<ScrapedArticle[]> {
   }
 }
 
+async function scrapeHdtvtest(): Promise<ScrapedArticle[]> {
+  try {
+    // hdtvtest.co.uk has no RSS feed at all (confirmed: no <link rel=alternate>,
+    // no /feed, /rss, /feed.xml, /rss.xml, nothing in robots.txt). It's a Next.js
+    // site whose /news listing page is client-rendered (near-empty HTML), but the
+    // homepage itself is server-rendered with the latest article cards inline, so
+    // scrape that instead of /news.
+    const res = await fetch("https://www.hdtvtest.co.uk/", {
+      headers: { "User-Agent": UA },
+    });
+    if (!res.ok) return [];
+    const html = await res.text();
+
+    const articles: ScrapedArticle[] = [];
+    // Pattern: <a href="/news/SLUG">...<img alt="TITLE" ... srcSet="...Screenshot_from_YYYY_MM_DD_..." ...>
+    // Capture the whole <img ...> tag's attributes so alt and srcSet can be
+    // pulled out regardless of attribute order (a fixed-order regex missed
+    // srcSet whenever other attributes came between alt and it).
+    const regex = /href="(\/news\/[a-z0-9-]+)"[^>]*>(?:(?!<a )[\s\S])*?<img ([^>]+)>/gi;
+    let match;
+    const seen = new Set<string>();
+    const today = new Date().toISOString().slice(0, 10);
+    while ((match = regex.exec(html)) !== null) {
+      const path = match[1];
+      const url = `https://www.hdtvtest.co.uk${path}`;
+      if (seen.has(url)) continue;
+      seen.add(url);
+      const attrs = match[2];
+      const altMatch = attrs.match(/alt="([^"]+)"/);
+      if (!altMatch) continue;
+      const title = altMatch[1].trim()
+        .replace(/&amp;/g, "&").replace(/&#8217;|&#x27;/g, "'").replace(/&#8211;/g, "–")
+        .replace(/&#038;/g, "&").replace(/&#8220;/g, "\u201C").replace(/&#8221;/g, "\u201D");
+      // Try to pull a YYYY_MM_DD timestamp out of the screenshot filename in
+      // the srcSet — not an exact publish date, but close (editors screenshot
+      // around the time they write the story), and far better than nothing.
+      let date = today;
+      const dateMatch = attrs.match(/(\d{4})_(\d{2})_(\d{2})_/);
+      if (dateMatch) {
+        const [, yyyy, mm, dd] = dateMatch;
+        const candidate = `${yyyy}-${mm}-${dd}`;
+        if (!isNaN(new Date(candidate).getTime()) && candidate <= today) date = candidate;
+      }
+      articles.push({ title, url, date, site: "hdtvtest" });
+    }
+
+    console.log(`[scraper] HDTVTest: found ${articles.length} articles`);
+    return articles;
+  } catch (err: any) {
+    console.error("[scraper] HDTVTest error:", err?.message);
+    return [];
+  }
+}
+
 export async function scrapeAllSites(): Promise<ScrapedArticle[]> {
-  const [tas] = await Promise.all([
+  const [tas, hdtv] = await Promise.all([
     scrapeAbsoluteSound(),
+    scrapeHdtvtest(),
   ]);
-  return [...tas];
+  return [...tas, ...hdtv];
 }
