@@ -484,7 +484,7 @@ export async function registerRoutes(httpServer: Server, app: Express) {
     steps.push({ step: "site_enabled_or_always_visible", pass: enabledOk, always_visible: ALWAYS_VISIBLE_SITES.has(row.site), in_enabled: enabledSiteKeys.has(row.site) });
 
     // Step 5: relevance keyword (always-visible + audio sites bypass)
-    const AUDIO_SITES = new Set(["whathifi", "hifipig", "darko", "ecoustics", "absolutesound", "hifinews", "audiophileman", "twitteringmachines", "audiohead", "soundstage", "hometheaterhifi", "stereophile", "audioxpress", "dailyaudio", "gearpatrol", "sempre", "channelnews", "hifiplus", "audiophilia", "audioholics", "dagogo", "parttimeaudiophile", "enjoythemusic", "audioresurgence", "audiobacon", "soundstagehifi", "monoandstereo", "email_pressroom", "editor-brief"]);
+    const AUDIO_SITES = new Set(["whathifi", "hifipig", "darko", "ecoustics", "absolutesound", "hifinews", "audiophileman", "twitteringmachines", "audiohead", "soundstage", "hometheaterhifi", "stereophile", "audioxpress", "dailyaudio", "gearpatrol", "sempre", "channelnews", "hifiplus", "audiophilia", "audioholics", "dagogo", "parttimeaudiophile", "enjoythemusic", "audioresurgence", "audiobacon", "soundstagehifi", "monoandstereo", "avnirvana", "email_pressroom", "editor-brief"]);
     const GOLD_STANDARD_SITES = new Set(["ecoustics", "stereophile", "absolutesound", "whathifi", "hifinews", "hifiplus", "email_pressroom", "editor-brief"]);
     const relevanceOk = ALWAYS_VISIBLE_SITES.has(row.site) || AUDIO_SITES.has(row.site) || GOLD_STANDARD_SITES.has(row.site);
     steps.push({ step: "relevance_bypassed_by_site", pass: relevanceOk });
@@ -3601,7 +3601,7 @@ export async function registerRoutes(httpServer: Server, app: Express) {
         const enabledSiteKeys = new Set((storage as any).getEnabledSites().filter((s: any) => s.site_key !== "stereonet").map((s: any) => s.site_key));
         const enabledOk = ALWAYS_VISIBLE_SITES.has(row.site) || enabledSiteKeys.has(row.site);
         steps.push({ step: "site_enabled_or_always_visible", pass: enabledOk, in_enabled: enabledSiteKeys.has(row.site) });
-        const AUDIO_SITES = new Set(["whathifi", "hifipig", "darko", "ecoustics", "absolutesound", "hifinews", "audiophileman", "twitteringmachines", "audiohead", "soundstage", "hometheaterhifi", "stereophile", "audioxpress", "dailyaudio", "gearpatrol", "sempre", "channelnews", "hifiplus", "audiophilia", "audioholics", "dagogo", "parttimeaudiophile", "enjoythemusic", "audioresurgence", "audiobacon", "soundstagehifi", "monoandstereo", "email_pressroom", "editor-brief"]);
+        const AUDIO_SITES = new Set(["whathifi", "hifipig", "darko", "ecoustics", "absolutesound", "hifinews", "audiophileman", "twitteringmachines", "audiohead", "soundstage", "hometheaterhifi", "stereophile", "audioxpress", "dailyaudio", "gearpatrol", "sempre", "channelnews", "hifiplus", "audiophilia", "audioholics", "dagogo", "parttimeaudiophile", "enjoythemusic", "audioresurgence", "audiobacon", "soundstagehifi", "monoandstereo", "avnirvana", "email_pressroom", "editor-brief"]);
         const GOLD_STANDARD_SITES = new Set(["ecoustics", "stereophile", "absolutesound", "whathifi", "hifinews", "hifiplus", "email_pressroom", "editor-brief"]);
         const relevanceOk = ALWAYS_VISIBLE_SITES.has(row.site) || AUDIO_SITES.has(row.site) || GOLD_STANDARD_SITES.has(row.site);
         steps.push({ step: "relevance_bypassed_by_site", pass: relevanceOk, note: relevanceOk ? "bypassed\u2014no keyword check" : "REQUIRES keyword match" });

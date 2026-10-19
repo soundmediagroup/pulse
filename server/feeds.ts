@@ -127,6 +127,12 @@ export const SITES = {
     color: "#1428a0",
   },
 
+  avnirvana: {
+    label: "AV NIRVANA",
+    url: "https://www.avnirvana.com/forums/av-industry-news.6/index.rss",
+    color: "#2563eb",
+  },
+
   // ─── Added April 2026 ──────────────────────────────────────
   audioholics: {
     label: "Audioholics",

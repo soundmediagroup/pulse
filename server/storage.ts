@@ -1904,6 +1904,7 @@ export const storage: IStorage = {
       "audiobacon",       // audio blog
       "soundstagehifi",   // SoundStage variant
       "monoandstereo",    // audio blog
+      "avnirvana",        // AV NIRVANA forum's original-staff AV Industry News section
       // Primary-source watchers — always relevant, always gold-standard
       "fcc_filings",       // FCC product certifications (scoops 30-90 days early)
       "youtube_reviewers", // gold-standard reviewer video uploads
