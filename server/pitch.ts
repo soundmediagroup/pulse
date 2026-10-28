@@ -757,12 +757,18 @@ type AudienceSnapshot = {
   as_of: string;
   scope: "global" | string[];
   scope_label: string;
+  // monthly_uniques is now the VERIFIED readers figure (GA4 activeUsers with
+  // confirmed-automated device/OS segments removed for this region scope) —
+  // consistent with the public advertising page's methodology. See
+  // excluded_bot_users for how many were dropped.
   monthly_uniques: number;
   monthly_sessions: number;
   monthly_pageviews: number;
   monthly_uniques_fmt: string;
   monthly_sessions_fmt: string;
   monthly_pageviews_fmt: string;
+  excluded_bot_users: number;
+  methodology: string;
 } | null;
 
 // Cache key includes region scope so different regional proposals don't collide.
@@ -975,27 +981,38 @@ async function getAudienceSnapshot(regions: string[] = []): Promise<AudienceSnap
     const end = new Date(); end.setDate(end.getDate() - 1);
     const start = new Date(end); start.setDate(start.getDate() - 29);
     const fmt = (d: Date) => d.toISOString().slice(0, 10);
-    // Bigger numbers look better. Do NOT exclude bot countries on the public proposal.
+    // Same methodology as the public advertising page: GA4 activeUsers with
+    // only confirmed-automated device/OS segments removed for this region
+    // scope (updated 28 Oct 2026 — previously used raw unfiltered numbers
+    // per an earlier "bigger numbers look better" call; superseded so every
+    // advertiser-facing number is consistent and defensible).
     const includeCountries = buildRegionFilter(normalised);
-    console.log(`[pitch] fetching GA4 overview ${fmt(start)} → ${fmt(end)} scope=${cacheKey} include=${includeCountries?.length || 0} (no bot exclusion)`);
-    const overview = await fetchGA4Overview(fmt(start), fmt(end), undefined, includeCountries);
+    const { fetchGA4OSBreakdown: fetchOS, sumVerifiedUsers: sumVerified } = await import("./analytics");
+    console.log(`[pitch] fetching GA4 overview ${fmt(start)} → ${fmt(end)} scope=${cacheKey} include=${includeCountries?.length || 0}`);
+    const [overview, osRows] = await Promise.all([
+      fetchGA4Overview(fmt(start), fmt(end), undefined, includeCountries),
+      fetchOS(fmt(start), fmt(end), includeCountries).catch(() => []),
+    ]);
     if (!overview) {
       lastAudienceError = "GA4 returned null — see server logs.";
       console.warn("[pitch] GA4 overview returned null");
       return null;
     }
     lastAudienceError = null;
+    const verifiedResult = sumVerified(osRows);
     const data: AudienceSnapshot = {
       period_label: "last 30 days",
       as_of: fmt(end),
       scope: normalised.length === 0 ? "global" : normalised,
       scope_label: labelForRegionScope(normalised),
-      monthly_uniques: overview.activeUsers || 0,
+      monthly_uniques: verifiedResult.verified,
       monthly_sessions: overview.sessions || 0,
       monthly_pageviews: overview.pageviews || 0,
-      monthly_uniques_fmt: formatCompact(overview.activeUsers || 0),
+      monthly_uniques_fmt: formatCompact(verifiedResult.verified),
       monthly_sessions_fmt: formatCompact(overview.sessions || 0),
       monthly_pageviews_fmt: formatCompact(overview.pageviews || 0),
+      excluded_bot_users: verifiedResult.excludedUsers,
+      methodology: "GA4, rolling 30-day window, confirmed-automated device/OS segments removed.",
     };
     audienceCache.set(cacheKey, { ts: now, data });
     return data;

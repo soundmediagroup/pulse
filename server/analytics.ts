@@ -162,11 +162,14 @@ export async function fetchCloudflareUniques(startDate: string, endDate: string)
 // engagement-rate filter does. Flags are heuristic, not hardcoded to any one
 // OS name, so they keep working if the bot signature moves to a different
 // platform.
-export async function fetchGA4OSBreakdown(startDate: string, endDate: string) {
+export async function fetchGA4OSBreakdown(startDate: string, endDate: string, includeCountries?: string[]) {
   const a = getAuth();
   if (!a) return [];
   try {
     const analyticsdata = google.analyticsdata({ version: "v1beta", auth: a });
+    const dimensionFilter = includeCountries && includeCountries.length > 0
+      ? buildCountryScopeFilter(includeCountries)
+      : undefined;
     const res = await analyticsdata.properties.runReport({
       property: `properties/${GA4_PROPERTY()}`,
       requestBody: {
@@ -180,6 +183,7 @@ export async function fetchGA4OSBreakdown(startDate: string, endDate: string) {
         ],
         orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
         limit: 50,
+        ...(dimensionFilter && { dimensionFilter }),
       },
     });
     return (res.data.rows || []).map(row => ({
