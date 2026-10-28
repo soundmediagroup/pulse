@@ -88,6 +88,8 @@ export async function fetchGA4Overview(
           { name: "averageSessionDuration" },
           { name: "bounceRate" },
           { name: "newUsers" },
+          { name: "engagedSessions" },
+          { name: "engagementRate" },
         ],
         ...(dimensionFilter && { dimensionFilter }),
       },
@@ -102,9 +104,51 @@ export async function fetchGA4Overview(
       avgSessionDuration: parseFloat(vals[3]),
       bounceRate: parseFloat(vals[4]),
       newUsers: parseInt(vals[5]),
+      engagedSessions: parseInt(vals[6]),
+      engagementRate: parseFloat(vals[7]),
     };
   } catch (e: any) {
     console.error("[analytics] GA4 overview error:", e.message);
+    return null;
+  }
+}
+
+// ─── Cloudflare edge analytics ──────────────────────────────────────────────
+// Used ONLY to show (and debunk) the inflated "unique visitors" number some
+// competitors quote from their CDN. Cloudflare's "uniques" dedupes by IP at
+// the edge across every request (bots, scrapers, AI crawlers, CDN probes —
+// no human/bot distinction at all), so it is NOT comparable to a GA4 human
+// audience figure. Deliberately kept separate from the GA4-based canonical
+// stats above; never blend this number into "visitors"/"readers" copy.
+export async function fetchCloudflareUniques(startDate: string, endDate: string) {
+  const token = cfg("CLOUDFLARE_API_TOKEN");
+  const zoneTag = cfg("CLOUDFLARE_ZONE_ID");
+  if (!token || !zoneTag) return null;
+  try {
+    const query = {
+      query: `query { viewer { zones(filter: {zoneTag: "${zoneTag}"}) { totals: httpRequests1dGroups(limit: 1, filter: {date_geq: "${startDate}", date_leq: "${endDate}"}) { sum { requests pageViews } uniq { uniques } } } } }`,
+    };
+    const resp = await fetch("https://api.cloudflare.com/client/v4/graphql", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(query),
+    });
+    const json: any = await resp.json();
+    const totals = json?.data?.viewer?.zones?.[0]?.totals?.[0];
+    if (!totals) {
+      console.error("[analytics] Cloudflare GraphQL returned no totals:", JSON.stringify(json).slice(0, 500));
+      return null;
+    }
+    return {
+      uniques: totals.uniq?.uniques || 0,
+      requests: totals.sum?.requests || 0,
+      pageViews: totals.sum?.pageViews || 0,
+    };
+  } catch (e: any) {
+    console.error("[analytics] Cloudflare uniques fetch failed:", e.message);
     return null;
   }
 }

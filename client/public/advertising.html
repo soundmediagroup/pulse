@@ -285,8 +285,8 @@
     <div class="sn-adv-stats-row">
       <div class="sn-adv-stats-row-label">Audience Quality</div>
       <div class="sn-adv-stats-grid">
-        <div class="sn-adv-stat"><div class="sn-adv-stat-num" id="sn-adv-stat-visitors">590K+<sup>*</sup></div><div class="sn-adv-stat-label">Monthly Human Visitors</div><div class="sn-adv-stat-sub">Bots removed · GA4 verified</div></div>
-        <div class="sn-adv-stat"><div class="sn-adv-stat-num" id="sn-adv-stat-pageviews">1.3M+</div><div class="sn-adv-stat-label">Human Page Views / Month</div><div class="sn-adv-stat-sub">Bots removed · GA4 verified</div></div>
+        <div class="sn-adv-stat"><div class="sn-adv-stat-num" id="sn-adv-stat-visitors">248K+<sup>*</sup></div><div class="sn-adv-stat-label">Engaged Monthly Readers</div><div class="sn-adv-stat-sub">GA4 engagement-qualified · not raw hits</div></div>
+        <div class="sn-adv-stat"><div class="sn-adv-stat-num" id="sn-adv-stat-pageviews">1.3M+</div><div class="sn-adv-stat-label">Page Views / Month</div><div class="sn-adv-stat-sub">GA4, 30-day rolling</div></div>
         <div class="sn-adv-stat"><div class="sn-adv-stat-num">86%</div><div class="sn-adv-stat-label">In Hobby 20+ Years</div><div class="sn-adv-stat-sub">StereoNET Reader Survey, May 2026</div></div>
         <div class="sn-adv-stat"><div class="sn-adv-stat-num">#11</div><div class="sn-adv-stat-label">Similarweb Global Rank</div><div class="sn-adv-stat-sub">Consumer Electronics</div></div>
       </div>
@@ -302,7 +302,17 @@
       </div>
     </div>
 
-    <p class="sn-adv-stats-footnote"><sup>*</sup> Actual human traffic only — bots filtered. Source data: Google Analytics 4 (audience), Cloudflare (AI bot traffic).</p>
+    <p class="sn-adv-stats-footnote"><sup>*</sup> "Engaged" = GA4's own standard for a real visit: 10+ seconds of active time, 2+ pageviews, or a conversion event — not just a hit on the server. Source: Google Analytics 4, rolling 30-day window.</p>
+
+    <div class="sn-adv-cf-note" id="sn-adv-cf-note" style="display:none;">
+      <p class="sn-adv-stats-footnote" style="margin-top:12px; padding-top:12px; border-top:1px solid var(--sn-border);">
+        <strong>Why don't we quote a bigger number?</strong> Server-log tools like Cloudflare report
+        <strong><span id="sn-adv-cf-uniques">—</span> "unique visitors"</strong> on stereonet.com over the same 30-day window —
+        that figure counts every bot, AI crawler, and scraper that touches our edge, with zero human/bot distinction.
+        It isn't a readership number, so we don't publish it as one. Every number above this line is audited against
+        real engagement, not raw server hits.
+      </p>
+    </div>
   </section>
 
   <!-- ─── Research sources chart ──────────────────────────────────────── -->
@@ -720,8 +730,19 @@
         if (!j || !j.ok) return;
         var v = document.getElementById('sn-adv-stat-visitors');
         var p = document.getElementById('sn-adv-stat-pageviews');
-        if (v && j.monthly_visitors_fmt) v.innerHTML = j.monthly_visitors_fmt + '<sup>*</sup>';
+        // Engagement-qualified figure is the defensible headline number —
+        // falls back to raw-ish monthly_visitors_fmt only if engagement
+        // data isn't present yet (older cached API response).
+        var engagedFmt = j.engaged_users_est_fmt || j.engaged_sessions_fmt;
+        if (v && engagedFmt) v.innerHTML = engagedFmt + '<sup>*</sup>';
         if (p && j.monthly_pageviews_fmt) p.textContent = j.monthly_pageviews_fmt;
+
+        if (j.cloudflare_uniques_fmt) {
+          var cfNote = document.getElementById('sn-adv-cf-note');
+          var cfNum = document.getElementById('sn-adv-cf-uniques');
+          if (cfNum) cfNum.textContent = j.cloudflare_uniques_fmt;
+          if (cfNote) cfNote.style.display = 'block';
+        }
       })
       .catch(function(){});
   })();

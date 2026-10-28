@@ -1029,6 +1029,21 @@ type CanonicalAudienceStats = {
   monthly_visitors_fmt: string;
   monthly_pageviews_fmt: string;
   methodology: string;
+  // Engagement-qualified figures (GA4 standard: 10s+ active, or 2+ pageviews,
+  // or a conversion event) — the defensible, bot-resistant headline number.
+  engaged_sessions: number;
+  engagement_rate: number;
+  engaged_users_est: number;
+  engaged_sessions_fmt: string;
+  engaged_users_est_fmt: string;
+  engagement_rate_pct: string;
+  // Cloudflare edge "uniques" for the same window — included ONLY so the
+  // page can show its own real number next to competitors' inflated
+  // CDN-sourced claims, with an explicit explanation of why it's not used
+  // as a headline figure. Null if CLOUDFLARE_API_TOKEN isn't configured.
+  cloudflare_uniques: number | null;
+  cloudflare_uniques_fmt: string | null;
+  cloudflare_requests: number | null;
 } | null;
 
 let canonicalStatsCache: { ts: number; data: CanonicalAudienceStats } | null = null;
@@ -1045,9 +1060,11 @@ export async function getCanonicalAudienceStats(forceRefresh = false): Promise<C
     const start = new Date(end); start.setDate(start.getDate() - 29);
     const fmt = (d: Date) => d.toISOString().slice(0, 10);
     // No excludeCountries / includeCountries — GA4's own default bot filtering only.
-    const [overview, countries] = await Promise.all([
+    const { fetchCloudflareUniques } = await import("./analytics");
+    const [overview, countries, cfStats] = await Promise.all([
       fetchGA4Overview(fmt(start), fmt(end)),
       fetchGA4Countries(fmt(start), fmt(end), 250),
+      fetchCloudflareUniques(fmt(start), fmt(end)).catch(() => null),
     ]);
     if (!overview) {
       lastCanonicalStatsError = "GA4 returned null — see server logs.";
@@ -1058,6 +1075,9 @@ export async function getCanonicalAudienceStats(forceRefresh = false): Promise<C
     const secs = Math.round(overview.avgSessionDuration || 0);
     const mins = Math.floor(secs / 60);
     const rem = secs % 60;
+    const engagedSessions = overview.engagedSessions || 0;
+    const engagementRate = overview.engagementRate || 0;
+    const engagedUsersEst = Math.round((overview.activeUsers || 0) * engagementRate);
     const data: CanonicalAudienceStats = {
       period_label: "last 30 days",
       period_days: 30,
@@ -1071,6 +1091,15 @@ export async function getCanonicalAudienceStats(forceRefresh = false): Promise<C
       monthly_visitors_fmt: formatCompact(overview.activeUsers || 0),
       monthly_pageviews_fmt: formatCompact(overview.pageviews || 0),
       methodology: "Google Analytics 4, rolling 30-day window, GA4 native bot filtering only.",
+      engaged_sessions: engagedSessions,
+      engagement_rate: engagementRate,
+      engaged_users_est: engagedUsersEst,
+      engaged_sessions_fmt: formatCompact(engagedSessions),
+      engaged_users_est_fmt: formatCompact(engagedUsersEst),
+      engagement_rate_pct: `${(engagementRate * 100).toFixed(1)}%`,
+      cloudflare_uniques: cfStats?.uniques ?? null,
+      cloudflare_uniques_fmt: cfStats ? formatCompact(cfStats.uniques) : null,
+      cloudflare_requests: cfStats?.requests ?? null,
     };
     canonicalStatsCache = { ts: now, data };
     return data;
