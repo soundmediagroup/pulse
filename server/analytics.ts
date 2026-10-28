@@ -153,6 +153,73 @@ export async function fetchCloudflareUniques(startDate: string, endDate: string)
   }
 }
 
+// ─── Device/OS segment breakdown (bot-cluster detection) ──────────────────────
+// Returns per-(operatingSystem, deviceCategory) rows with activeUsers, sessions,
+// and averageSessionDuration. Used to compute a "verified readers" figure that
+// excludes only segments showing an unambiguous automated-traffic signature
+// (near-zero average session length at meaningful volume), rather than
+// penalizing every fast-but-real visit site-wide the way a blanket
+// engagement-rate filter does. Flags are heuristic, not hardcoded to any one
+// OS name, so they keep working if the bot signature moves to a different
+// platform.
+export async function fetchGA4OSBreakdown(startDate: string, endDate: string) {
+  const a = getAuth();
+  if (!a) return [];
+  try {
+    const analyticsdata = google.analyticsdata({ version: "v1beta", auth: a });
+    const res = await analyticsdata.properties.runReport({
+      property: `properties/${GA4_PROPERTY()}`,
+      requestBody: {
+        dateRanges: [{ startDate, endDate }],
+        dimensions: [{ name: "operatingSystem" }, { name: "deviceCategory" }],
+        metrics: [
+          { name: "activeUsers" },
+          { name: "sessions" },
+          { name: "averageSessionDuration" },
+          { name: "engagedSessions" },
+        ],
+        orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
+        limit: 50,
+      },
+    });
+    return (res.data.rows || []).map(row => ({
+      operatingSystem: row.dimensionValues![0].value!,
+      deviceCategory: row.dimensionValues![1].value!,
+      activeUsers: parseInt(row.metricValues![0].value!),
+      sessions: parseInt(row.metricValues![1].value!),
+      avgSessionDuration: parseFloat(row.metricValues![2].value!),
+      engagedSessions: parseInt(row.metricValues![3].value!),
+    }));
+  } catch (e: any) {
+    console.error("[analytics] GA4 OS breakdown error:", e.message);
+    return [];
+  }
+}
+
+// Sums activeUsers across every segment EXCEPT ones showing an unambiguous
+// automated-traffic signature: average session under MIN_HUMAN_SESSION_SECS
+// at a volume too large to be noise (MIN_SEGMENT_SESSIONS). This is
+// deliberately conservative — it only removes segments where humans
+// mechanically could not have produced that behavior (nobody reads a page in
+// under ~8 seconds at scale), not segments that are merely below-average.
+export function sumVerifiedUsers(rows: Array<{ activeUsers: number; sessions: number; avgSessionDuration: number }>) {
+  const MIN_HUMAN_SESSION_SECS = 8;
+  const MIN_SEGMENT_SESSIONS = 1000;
+  let verified = 0;
+  let excludedUsers = 0;
+  const excludedSegments: Array<{ activeUsers: number; sessions: number; avgSessionDuration: number }> = [];
+  for (const row of rows) {
+    const looksAutomated = row.avgSessionDuration < MIN_HUMAN_SESSION_SECS && row.sessions >= MIN_SEGMENT_SESSIONS;
+    if (looksAutomated) {
+      excludedUsers += row.activeUsers;
+      excludedSegments.push(row);
+    } else {
+      verified += row.activeUsers;
+    }
+  }
+  return { verified, excludedUsers, excludedSegments };
+}
+
 export async function fetchGA4Daily(startDate: string, endDate: string, excludeCountries?: string[]) {
   const a = getAuth();
   if (!a) return [];

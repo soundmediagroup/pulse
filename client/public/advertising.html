@@ -285,7 +285,7 @@
     <div class="sn-adv-stats-row">
       <div class="sn-adv-stats-row-label">Audience Quality</div>
       <div class="sn-adv-stats-grid">
-        <div class="sn-adv-stat"><div class="sn-adv-stat-num" id="sn-adv-stat-visitors">248K+<sup>*</sup></div><div class="sn-adv-stat-label">Engaged Monthly Readers</div><div class="sn-adv-stat-sub">GA4 engagement-qualified · not raw hits</div></div>
+        <div class="sn-adv-stat"><div class="sn-adv-stat-num" id="sn-adv-stat-visitors">628K+<sup>*</sup></div><div class="sn-adv-stat-label">Verified Monthly Readers</div><div class="sn-adv-stat-sub">GA4 · automated traffic segments removed</div></div>
         <div class="sn-adv-stat"><div class="sn-adv-stat-num" id="sn-adv-stat-pageviews">1.3M+</div><div class="sn-adv-stat-label">Page Views / Month</div><div class="sn-adv-stat-sub">GA4, 30-day rolling</div></div>
         <div class="sn-adv-stat"><div class="sn-adv-stat-num">86%</div><div class="sn-adv-stat-label">In Hobby 20+ Years</div><div class="sn-adv-stat-sub">StereoNET Reader Survey, May 2026</div></div>
         <div class="sn-adv-stat"><div class="sn-adv-stat-num">#11</div><div class="sn-adv-stat-label">Similarweb Global Rank</div><div class="sn-adv-stat-sub">Consumer Electronics</div></div>
@@ -302,7 +302,7 @@
       </div>
     </div>
 
-    <p class="sn-adv-stats-footnote"><sup>*</sup> "Engaged" = GA4's own standard for a real visit: 10+ seconds of active time, 2+ pageviews, or a conversion event — not just a hit on the server. Source: Google Analytics 4, rolling 30-day window.</p>
+    <p class="sn-adv-stats-footnote"><sup>*</sup> "Verified" = Google Analytics 4 monthly readers with confirmed automated-traffic segments removed (device/browser clusters averaging under 8 seconds per visit at meaningful volume — not achievable by a human reading a page), every other visit counted as-is. Source: Google Analytics 4, rolling 30-day window.</p>
 
     <div class="sn-adv-cf-note" id="sn-adv-cf-note" style="display:none;">
       <p class="sn-adv-stats-footnote" style="margin-top:12px; padding-top:12px; border-top:1px solid var(--sn-border);">
@@ -730,11 +730,12 @@
         if (!j || !j.ok) return;
         var v = document.getElementById('sn-adv-stat-visitors');
         var p = document.getElementById('sn-adv-stat-pageviews');
-        // Engagement-qualified figure is the defensible headline number —
-        // falls back to raw-ish monthly_visitors_fmt only if engagement
-        // data isn't present yet (older cached API response).
-        var engagedFmt = j.engaged_users_est_fmt || j.engaged_sessions_fmt;
-        if (v && engagedFmt) v.innerHTML = engagedFmt + '<sup>*</sup>';
+        // "Verified readers" (automated-segment exclusion) is the headline
+        // number — falls back to the stricter engagement-qualified figure,
+        // then raw monthly_visitors_fmt, if older cached API responses don't
+        // have the newer field yet.
+        var headlineFmt = j.monthly_verified_readers_fmt || j.engaged_users_est_fmt || j.engaged_sessions_fmt;
+        if (v && headlineFmt) v.innerHTML = headlineFmt + '<sup>*</sup>';
         if (p && j.monthly_pageviews_fmt) p.textContent = j.monthly_pageviews_fmt;
 
         if (j.cloudflare_uniques_fmt) {

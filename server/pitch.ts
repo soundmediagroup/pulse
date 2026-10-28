@@ -1044,6 +1044,14 @@ type CanonicalAudienceStats = {
   cloudflare_uniques: number | null;
   cloudflare_uniques_fmt: string | null;
   cloudflare_requests: number | null;
+  // "Verified readers": GA4 activeUsers with only confirmed-automated
+  // segments removed (device/OS combos averaging under 8s/session at
+  // meaningful volume — not human-possible reading behavior), rather than
+  // the stricter engagement-rate filter above. More representative of real
+  // reach; still fully defensible since excluded segments are unambiguous.
+  monthly_verified_readers: number;
+  monthly_verified_readers_fmt: string;
+  excluded_bot_users: number;
 } | null;
 
 let canonicalStatsCache: { ts: number; data: CanonicalAudienceStats } | null = null;
@@ -1060,11 +1068,12 @@ export async function getCanonicalAudienceStats(forceRefresh = false): Promise<C
     const start = new Date(end); start.setDate(start.getDate() - 29);
     const fmt = (d: Date) => d.toISOString().slice(0, 10);
     // No excludeCountries / includeCountries — GA4's own default bot filtering only.
-    const { fetchCloudflareUniques } = await import("./analytics");
-    const [overview, countries, cfStats] = await Promise.all([
+    const { fetchCloudflareUniques, fetchGA4OSBreakdown, sumVerifiedUsers } = await import("./analytics");
+    const [overview, countries, cfStats, osRows] = await Promise.all([
       fetchGA4Overview(fmt(start), fmt(end)),
       fetchGA4Countries(fmt(start), fmt(end), 250),
       fetchCloudflareUniques(fmt(start), fmt(end)).catch(() => null),
+      fetchGA4OSBreakdown(fmt(start), fmt(end)).catch(() => []),
     ]);
     if (!overview) {
       lastCanonicalStatsError = "GA4 returned null — see server logs.";
@@ -1078,6 +1087,7 @@ export async function getCanonicalAudienceStats(forceRefresh = false): Promise<C
     const engagedSessions = overview.engagedSessions || 0;
     const engagementRate = overview.engagementRate || 0;
     const engagedUsersEst = Math.round((overview.activeUsers || 0) * engagementRate);
+    const verifiedResult = sumVerifiedUsers(osRows);
     const data: CanonicalAudienceStats = {
       period_label: "last 30 days",
       period_days: 30,
@@ -1100,6 +1110,9 @@ export async function getCanonicalAudienceStats(forceRefresh = false): Promise<C
       cloudflare_uniques: cfStats?.uniques ?? null,
       cloudflare_uniques_fmt: cfStats ? formatCompact(cfStats.uniques) : null,
       cloudflare_requests: cfStats?.requests ?? null,
+      monthly_verified_readers: verifiedResult.verified,
+      monthly_verified_readers_fmt: formatCompact(verifiedResult.verified),
+      excluded_bot_users: verifiedResult.excludedUsers,
     };
     canonicalStatsCache = { ts: now, data };
     return data;
