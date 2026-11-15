@@ -731,7 +731,7 @@ try {
   const flag = sqlite.prepare(`SELECT value FROM app_settings WHERE key = 'stereonet_url_backfill_v1'`).get() as any;
   if (!flag) {
     const segFor = (t: string | null) => t === "review" ? "reviews" : t === "news" ? "news" : t === "opinion" ? "opinion" : t === "feature" ? "features" : null;
-    const ALREADY_RE = /^\/(news|reviews|opinion|features|opinions|review|headphone-zone|tag|category|series|forum|product-news|videos|video|in-the-press|press-release|press-releases|podcast|podcasts|community|guide|guides|deals|gallery|images|account|advertising)(\/|$)/i;
+    const ALREADY_RE = /^\/(news|reviews|opinion|features|opinions|review|buyers-guides|headphone-zone|tag|category|series|forum|product-news|videos|video|in-the-press|press-release|press-releases|podcast|podcasts|community|guide|guides|deals|gallery|images|account|advertising)(\/|$)/i;
     const rows = sqlite.prepare(`SELECT id, url, content_type FROM articles WHERE site = 'stereonet'`).all() as any[];
     let fixed = 0, skipped = 0, collided = 0;
     const updateStmt = sqlite.prepare(`UPDATE articles SET url = ? WHERE id = ?`);
@@ -762,6 +762,48 @@ try {
     console.log(`[storage] StereoNET URL backfill complete: fixed=${fixed} skipped=${skipped} collided=${collided}`);
   }
 } catch (e) { console.warn("[storage] StereoNET URL backfill failed:", e); }
+
+// 2026-11: one-time backfill v2 — the v1 backfill above only ran once
+// (2026-06-12) and only covered the RSS ingest path. The separate
+// /api/ingest/article webhook path (CMS publish hook) never called the
+// repair function at all, so every stereonet article posted through that
+// webhook since has kept landing with a bare /<slug> URL. Fixed going
+// forward in routes.ts' normaliseArticleInput(); this sweeps the backlog.
+try {
+  const flag = sqlite.prepare(`SELECT value FROM app_settings WHERE key = 'stereonet_url_backfill_v2'`).get() as any;
+  if (!flag) {
+    const segFor = (t: string | null) => t === "review" ? "reviews" : t === "news" ? "news" : t === "opinion" ? "opinion" : t === "feature" ? "features" : null;
+    const ALREADY_RE = /^\/(news|reviews|opinion|features|opinions|review|buyers-guides|headphone-zone|tag|category|series|forum|product-news|videos|video|in-the-press|press-release|press-releases|podcast|podcasts|community|guide|guides|deals|gallery|images|account|advertising)(\/|$)/i;
+    const rows = sqlite.prepare(`SELECT id, url, content_type FROM articles WHERE site = 'stereonet'`).all() as any[];
+    let fixed = 0, skipped = 0, collided = 0;
+    const updateStmt = sqlite.prepare(`UPDATE articles SET url = ? WHERE id = ?`);
+    const existsStmt = sqlite.prepare(`SELECT id FROM articles WHERE url = ?`);
+    const deleteStmt = sqlite.prepare(`DELETE FROM articles WHERE id = ?`);
+    for (const r of rows) {
+      try {
+        const u = new URL(r.url);
+        if (!/(^|\.)stereonet\.com$/i.test(u.hostname)) { skipped++; continue; }
+        if (ALREADY_RE.test(u.pathname)) { skipped++; continue; }
+        const path = u.pathname.replace(/^\/+/, "");
+        if (!path) { skipped++; continue; }
+        const seg = segFor(r.content_type);
+        if (!seg) { skipped++; continue; }
+        u.pathname = `/${seg}/${path}`;
+        const newUrl = u.toString();
+        const dupe = existsStmt.get(newUrl) as any;
+        if (dupe && dupe.id !== r.id) {
+          deleteStmt.run(r.id);
+          collided++;
+          continue;
+        }
+        updateStmt.run(newUrl, r.id);
+        fixed++;
+      } catch { skipped++; }
+    }
+    sqlite.prepare(`INSERT INTO app_settings (key, value) VALUES ('stereonet_url_backfill_v2', ?)`).run(JSON.stringify({ ran_at: new Date().toISOString(), fixed, skipped, collided }));
+    console.log(`[storage] StereoNET URL backfill v2 complete: fixed=${fixed} skipped=${skipped} collided=${collided}`);
+  }
+} catch (e) { console.warn("[storage] StereoNET URL backfill v2 failed:", e); }
 
 // Article relevance feedback
 sqlite.exec(`

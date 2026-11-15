@@ -545,7 +545,7 @@ export function repairStereonetUrl(url: string, contentType: string | null | und
     if (!/(^|\.)stereonet\.com$/i.test(u.hostname)) return url;
     const path = u.pathname.replace(/^\/+/, "");
     // Already segmented? Leave alone.
-    if (/^(news|reviews|opinion|features|opinions|review|headphone-zone|tag|category|series|forum|product-news|videos|video|in-the-press|press-release|press-releases|podcast|podcasts|community|guide|guides|deals|gallery|images|account|advertising)\b/i.test(path)) {
+    if (/^(news|reviews|opinion|features|opinions|review|buyers-guides|headphone-zone|tag|category|series|forum|product-news|videos|video|in-the-press|press-release|press-releases|podcast|podcasts|community|guide|guides|deals|gallery|images|account|advertising)\b/i.test(path)) {
       return url;
     }
     // Need a slug to repair — if the path is empty (homepage) leave alone.

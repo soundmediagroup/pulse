@@ -797,6 +797,11 @@ export async function registerRoutes(httpServer: Server, app: Express) {
     const site = (typeof raw.site === "string" && raw.site.trim()) ? raw.site.trim() : "webhook";
     // An editor-brief always gets the editor_brief content_type so the UI can badge it.
     if (site === "editor-brief" && content_type === "unknown") content_type = "editor_brief";
+    // StereoNET's CMS webhook sometimes posts bare /<slug> URLs that 404 live
+    // (the real site routes through /news|reviews|opinion|features/<slug>).
+    // Apply the same repair the RSS ingest path uses, so PULSE never stores
+    // a broken stereonet link regardless of which path it came in through.
+    const repairedUrl = site === "stereonet" ? repairStereonetUrl(url, content_type) : url;
 
     const author = typeof raw.author === "string" ? raw.author.trim() || null : null;
     const categories = Array.isArray(raw.categories) ? raw.categories.filter((c: any) => typeof c === "string") : [];
@@ -824,7 +829,7 @@ export async function registerRoutes(httpServer: Server, app: Express) {
       article: {
         site,
         title,
-        url,
+        url: repairedUrl,
         publishedAt: published.toISOString(),
         publishedDate: published.toISOString().slice(0, 10),
         contentType: content_type,
