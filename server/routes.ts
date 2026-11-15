@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import type { Server } from "http";
 import { storage, sqlite } from "./storage";
-import { fetchAllSites, generateSeedData, SITES } from "./feeds";
+import { fetchAllSites, generateSeedData, SITES, repairStereonetUrl } from "./feeds";
 import { fetchForumStats, proxyForumPage, parseForumHtml } from "./forum";
 import { processRedlineJob, REDLINE_VERSION } from "./redline";
 import { fetchGA4Overview, fetchGA4Daily, fetchGA4TopPages, fetchGA4Sources, fetchGA4Countries, fetchGA4Regions, fetchGA4Devices, fetchSCQueries, fetchSCPages, fetchSCDaily, fetchSCDevices, fetchSCSearchAppearance, fetchSCSearchTypes, BOT_COUNTRIES } from "./analytics";
