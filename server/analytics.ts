@@ -340,6 +340,91 @@ export async function fetchGA4Countries(startDate: string, endDate: string, limi
 }
 
 
+// Shared region classification used by both the plain region breakdown and
+// the verified (bot-segment-excluded) region breakdown below. Hoisted out of
+// fetchGA4Regions so the two stay in sync — a country added to one set now
+// automatically applies to both.
+const REGION_SETS: Record<string, Set<string>> = {
+  "Americas": new Set([
+    // North America
+    "United States", "Canada", "Mexico",
+    // Central America
+    "Guatemala", "Belize", "El Salvador", "Honduras", "Nicaragua", "Costa Rica", "Panama",
+    // Caribbean
+    "Cuba", "Jamaica", "Haiti", "Dominican Republic", "Bahamas", "Barbados", "Trinidad and Tobago",
+    "Puerto Rico", "Cayman Islands", "Bermuda", "Aruba", "Curacao", "Cura\u00e7ao",
+    "Saint Lucia", "Grenada", "Dominica", "Antigua and Barbuda", "Saint Kitts and Nevis",
+    "Saint Vincent and the Grenadines", "Martinique", "Guadeloupe", "British Virgin Islands",
+    "U.S. Virgin Islands", "Turks and Caicos Islands", "Anguilla", "Montserrat", "Sint Maarten", "Saint Martin",
+    // South America
+    "Brazil", "Argentina", "Chile", "Colombia", "Peru", "Venezuela", "Ecuador", "Bolivia",
+    "Paraguay", "Uruguay", "Guyana", "Suriname", "French Guiana", "Falkland Islands",
+  ]),
+  "Australia/NZ/Pacific": new Set([
+    "Australia", "New Zealand",
+    "Fiji", "Papua New Guinea", "Samoa", "Tonga", "Vanuatu", "Solomon Islands", "New Caledonia",
+    "French Polynesia", "Cook Islands", "Kiribati", "Micronesia", "Palau", "Marshall Islands", "Nauru", "Tuvalu",
+    "Niue", "Tokelau", "American Samoa", "Guam", "Northern Mariana Islands", "Wallis and Futuna",
+    "Pitcairn Islands", "Norfolk Island", "Christmas Island", "Cocos (Keeling) Islands",
+  ]),
+  "Asia": new Set([
+    // East Asia
+    "China", "Japan", "South Korea", "North Korea", "Mongolia", "Taiwan", "Hong Kong", "Macau", "Macao",
+    // South Asia
+    "India", "Pakistan", "Bangladesh", "Sri Lanka", "Nepal", "Bhutan", "Maldives", "Afghanistan",
+    // Southeast Asia
+    "Indonesia", "Thailand", "Vietnam", "Philippines", "Malaysia", "Singapore", "Myanmar", "Cambodia",
+    "Laos", "Brunei", "Timor-Leste", "East Timor",
+    // Central Asia
+    "Kazakhstan", "Uzbekistan", "Turkmenistan", "Kyrgyzstan", "Tajikistan",
+  ]),
+  "Middle East": new Set([
+    "United Arab Emirates", "Saudi Arabia", "Israel", "Turkey", "T\u00fcrkiye", "Iran", "Iraq",
+    "Qatar", "Kuwait", "Oman", "Bahrain", "Yemen", "Jordan", "Lebanon", "Syria", "Palestine",
+  ]),
+  "UK & Europe": new Set([
+    // UK + EU + Scandinavia + Iceland
+    "United Kingdom", "Germany", "France", "Italy", "Spain", "Netherlands", "Belgium", "Sweden",
+    "Norway", "Denmark", "Finland", "Austria", "Switzerland", "Ireland", "Poland", "Portugal",
+    "Greece", "Czechia", "Czech Republic", "Romania", "Hungary", "Croatia", "Slovakia", "Slovenia",
+    "Bulgaria", "Lithuania", "Latvia", "Estonia", "Luxembourg", "Malta", "Cyprus", "Iceland",
+    // Non-EU Europe
+    "Russia", "Ukraine", "Belarus", "Moldova", "Serbia", "Montenegro", "Bosnia and Herzegovina",
+    "North Macedonia", "Macedonia", "Albania", "Kosovo", "Andorra", "Monaco", "San Marino", "Vatican City",
+    "Liechtenstein",
+    // Caucasus — European/European-adjacent
+    "Georgia", "Armenia", "Azerbaijan",
+    // British/French overseas territories geographically in Europe
+    "Gibraltar", "Isle of Man", "Jersey", "Guernsey", "Faroe Islands", "Greenland",
+  ]),
+  "Africa": new Set([
+    "South Africa", "Nigeria", "Kenya", "Egypt", "Morocco", "Ghana", "Ethiopia", "Tanzania", "Uganda",
+    "Algeria", "Tunisia", "Libya", "Sudan", "South Sudan", "Senegal", "C\u00f4te d\u2019Ivoire", "Ivory Coast",
+    "Cameroon", "Angola", "Mozambique", "Zambia", "Zimbabwe", "Botswana", "Namibia", "Madagascar",
+    "Mauritius", "Rwanda", "Burundi", "Somalia", "Eritrea", "Djibouti", "Mali", "Burkina Faso",
+    "Niger", "Chad", "Central African Republic", "Republic of the Congo", "Congo - Brazzaville", "Congo",
+    "Democratic Republic of the Congo", "Congo - Kinshasa", "Gabon", "Equatorial Guinea",
+    "S\u00e3o Tom\u00e9 & Pr\u00edncipe", "Sao Tome and Principe", "Gambia", "Guinea", "Guinea-Bissau",
+    "Sierra Leone", "Liberia", "Togo", "Benin", "Lesotho", "Eswatini", "Swaziland", "Malawi",
+    "Comoros", "Cape Verde", "Cabo Verde", "Seychelles", "Mauritania", "Reunion", "R\u00e9union",
+    "Western Sahara", "Mayotte", "Saint Helena",
+  ]),
+};
+const REGION_ORDER = ["Americas", "UK & Europe", "Australia/NZ/Pacific", "Asia", "Middle East", "Africa"];
+
+function classifyCountryRegion(country: string): string {
+  for (const region of REGION_ORDER) {
+    if (REGION_SETS[region].has(country)) return region;
+  }
+  if (!(globalThis as any).__loggedUnknownCountries) (globalThis as any).__loggedUnknownCountries = new Set();
+  const logged = (globalThis as any).__loggedUnknownCountries as Set<string>;
+  if (!logged.has(country)) {
+    logged.add(country);
+    console.log(`[analytics] Unmapped country in regions: "${country}" — falling back to UK & Europe`);
+  }
+  return "UK & Europe";
+}
+
 export async function fetchGA4Regions(startDate: string, endDate: string, excludeCountries?: string[]) {
   const a = getAuth();
   if (!a) return [];
@@ -357,104 +442,13 @@ export async function fetchGA4Regions(startDate: string, endDate: string, exclud
         ...(df && { dimensionFilter: df }),
       },
     });
-    const regionMap: Record<string, { users: number; sessions: number }> = {
-      "Americas": { users: 0, sessions: 0 },
-      "UK & Europe": { users: 0, sessions: 0 },
-      "Australia/NZ/Pacific": { users: 0, sessions: 0 },
-      "Asia": { users: 0, sessions: 0 },
-      "Middle East": { users: 0, sessions: 0 },
-      "Africa": { users: 0, sessions: 0 },
-    };
-    // Americas = North, Central, South America + Caribbean
-    const AMERICAS = new Set([
-      // North America
-      "United States", "Canada", "Mexico",
-      // Central America
-      "Guatemala", "Belize", "El Salvador", "Honduras", "Nicaragua", "Costa Rica", "Panama",
-      // Caribbean
-      "Cuba", "Jamaica", "Haiti", "Dominican Republic", "Bahamas", "Barbados", "Trinidad and Tobago",
-      "Puerto Rico", "Cayman Islands", "Bermuda", "Aruba", "Curacao", "Cura\u00e7ao",
-      "Saint Lucia", "Grenada", "Dominica", "Antigua and Barbuda", "Saint Kitts and Nevis",
-      "Saint Vincent and the Grenadines", "Martinique", "Guadeloupe", "British Virgin Islands",
-      "U.S. Virgin Islands", "Turks and Caicos Islands", "Anguilla", "Montserrat", "Sint Maarten", "Saint Martin",
-      // South America
-      "Brazil", "Argentina", "Chile", "Colombia", "Peru", "Venezuela", "Ecuador", "Bolivia",
-      "Paraguay", "Uruguay", "Guyana", "Suriname", "French Guiana", "Falkland Islands",
-    ]);
-    // Australia/NZ/Pacific = ANZ + all Pacific Islands
-    const ANZ_PAC = new Set([
-      "Australia", "New Zealand",
-      "Fiji", "Papua New Guinea", "Samoa", "Tonga", "Vanuatu", "Solomon Islands", "New Caledonia",
-      "French Polynesia", "Cook Islands", "Kiribati", "Micronesia", "Palau", "Marshall Islands", "Nauru", "Tuvalu",
-      "Niue", "Tokelau", "American Samoa", "Guam", "Northern Mariana Islands", "Wallis and Futuna",
-      "Pitcairn Islands", "Norfolk Island", "Christmas Island", "Cocos (Keeling) Islands",
-    ]);
-    // Asia = East, South, Southeast, Central Asia (Middle East handled separately)
-    const ASIA = new Set([
-      // East Asia
-      "China", "Japan", "South Korea", "North Korea", "Mongolia", "Taiwan", "Hong Kong", "Macau", "Macao",
-      // South Asia
-      "India", "Pakistan", "Bangladesh", "Sri Lanka", "Nepal", "Bhutan", "Maldives", "Afghanistan",
-      // Southeast Asia
-      "Indonesia", "Thailand", "Vietnam", "Philippines", "Malaysia", "Singapore", "Myanmar", "Cambodia",
-      "Laos", "Brunei", "Timor-Leste", "East Timor",
-      // Central Asia
-      "Kazakhstan", "Uzbekistan", "Turkmenistan", "Kyrgyzstan", "Tajikistan",
-    ]);
-    // Middle East = Arab states + Iran, Israel, Turkey
-    const MIDDLE_EAST = new Set([
-      "United Arab Emirates", "Saudi Arabia", "Israel", "Turkey", "T\u00fcrkiye", "Iran", "Iraq",
-      "Qatar", "Kuwait", "Oman", "Bahrain", "Yemen", "Jordan", "Lebanon", "Syria", "Palestine",
-    ]);
-    // UK & Europe = all European countries (EU, non-EU, Caucasus)
-    const UK_EU = new Set([
-      // UK + EU + Scandinavia + Iceland
-      "United Kingdom", "Germany", "France", "Italy", "Spain", "Netherlands", "Belgium", "Sweden",
-      "Norway", "Denmark", "Finland", "Austria", "Switzerland", "Ireland", "Poland", "Portugal",
-      "Greece", "Czechia", "Czech Republic", "Romania", "Hungary", "Croatia", "Slovakia", "Slovenia",
-      "Bulgaria", "Lithuania", "Latvia", "Estonia", "Luxembourg", "Malta", "Cyprus", "Iceland",
-      // Non-EU Europe
-      "Russia", "Ukraine", "Belarus", "Moldova", "Serbia", "Montenegro", "Bosnia and Herzegovina",
-      "North Macedonia", "Macedonia", "Albania", "Kosovo", "Andorra", "Monaco", "San Marino", "Vatican City",
-      "Liechtenstein",
-      // Caucasus — European/European-adjacent
-      "Georgia", "Armenia", "Azerbaijan",
-      // British/French overseas territories geographically in Europe
-      "Gibraltar", "Isle of Man", "Jersey", "Guernsey", "Faroe Islands", "Greenland",
-    ]);
-    // Africa = entire continent
-    const AFRICA = new Set([
-      "South Africa", "Nigeria", "Kenya", "Egypt", "Morocco", "Ghana", "Ethiopia", "Tanzania", "Uganda",
-      "Algeria", "Tunisia", "Libya", "Sudan", "South Sudan", "Senegal", "C\u00f4te d\u2019Ivoire", "Ivory Coast",
-      "Cameroon", "Angola", "Mozambique", "Zambia", "Zimbabwe", "Botswana", "Namibia", "Madagascar",
-      "Mauritius", "Rwanda", "Burundi", "Somalia", "Eritrea", "Djibouti", "Mali", "Burkina Faso",
-      "Niger", "Chad", "Central African Republic", "Republic of the Congo", "Congo - Brazzaville", "Congo",
-      "Democratic Republic of the Congo", "Congo - Kinshasa", "Gabon", "Equatorial Guinea",
-      "S\u00e3o Tom\u00e9 & Pr\u00edncipe", "Sao Tome and Principe", "Gambia", "Guinea", "Guinea-Bissau",
-      "Sierra Leone", "Liberia", "Togo", "Benin", "Lesotho", "Eswatini", "Swaziland", "Malawi",
-      "Comoros", "Cape Verde", "Cabo Verde", "Seychelles", "Mauritania", "Reunion", "R\u00e9union",
-      "Western Sahara", "Mayotte", "Saint Helena",
-    ]);
+    const regionMap: Record<string, { users: number; sessions: number }> = {};
+    for (const region of REGION_ORDER) regionMap[region] = { users: 0, sessions: 0 };
     for (const row of res.data.rows || []) {
       const country = row.dimensionValues![0].value!;
       const users = parseInt(row.metricValues![0].value!);
       const sessions = parseInt(row.metricValues![1].value!);
-      let region: string | null = null;
-      if (AMERICAS.has(country)) region = "Americas";
-      else if (ANZ_PAC.has(country)) region = "Australia/NZ/Pacific";
-      else if (ASIA.has(country)) region = "Asia";
-      else if (MIDDLE_EAST.has(country)) region = "Middle East";
-      else if (UK_EU.has(country)) region = "UK & Europe";
-      else if (AFRICA.has(country)) region = "Africa";
-      else {
-        if (!(globalThis as any).__loggedUnknownCountries) (globalThis as any).__loggedUnknownCountries = new Set();
-        const logged = (globalThis as any).__loggedUnknownCountries as Set<string>;
-        if (!logged.has(country)) {
-          logged.add(country);
-          console.log(`[analytics] Unmapped country in regions: "${country}" — falling back to UK & Europe`);
-        }
-        region = "UK & Europe";
-      }
+      const region = classifyCountryRegion(country);
       regionMap[region].users += users;
       regionMap[region].sessions += sessions;
     }
@@ -462,6 +456,64 @@ export async function fetchGA4Regions(startDate: string, endDate: string, exclud
   } catch (e: any) {
     console.error("[analytics] GA4 regions error:", e.message);
     return [];
+  }
+}
+
+// Region breakdown with the SAME automated-segment exclusion used for the
+// site-wide "verified readers" figure (sumVerifiedUsers), computed at
+// country × operatingSystem × deviceCategory granularity so a region's bot
+// farms don't get counted as that region's real readers. This is what backs
+// the public "By Region" stat (advertising page / press-releases) — do not
+// use the plain fetchGA4Regions() above for anything publisher-facing, it
+// includes unfiltered automated traffic and (as found 18 Nov 2026) skews
+// hard toward wherever the bot traffic happens to be geolocated.
+export async function fetchGA4VerifiedRegions(startDate: string, endDate: string) {
+  const a = getAuth();
+  if (!a) return { regions: [] as Array<{ region: string; users: number; sessions: number; pct: number }>, totalVerified: 0, totalExcluded: 0 };
+  const MIN_HUMAN_SESSION_SECS = 8;
+  const MIN_SEGMENT_SESSIONS = 1000;
+  try {
+    const analyticsdata = google.analyticsdata({ version: "v1beta", auth: a });
+    const res = await analyticsdata.properties.runReport({
+      property: `properties/${GA4_PROPERTY()}`,
+      requestBody: {
+        dateRanges: [{ startDate, endDate }],
+        dimensions: [{ name: "country" }, { name: "operatingSystem" }, { name: "deviceCategory" }],
+        metrics: [{ name: "activeUsers" }, { name: "sessions" }, { name: "averageSessionDuration" }],
+        orderBys: [{ metric: { metricName: "activeUsers" }, desc: true }],
+        limit: 50000,
+      },
+    });
+    const regionMap: Record<string, { users: number; sessions: number }> = {};
+    for (const region of REGION_ORDER) regionMap[region] = { users: 0, sessions: 0 };
+    let totalVerified = 0;
+    let totalExcluded = 0;
+    for (const row of res.data.rows || []) {
+      const country = row.dimensionValues![0].value!;
+      const users = parseInt(row.metricValues![0].value!);
+      const sessions = parseInt(row.metricValues![1].value!);
+      const avgDur = parseFloat(row.metricValues![2].value!);
+      // Same unambiguous-automation threshold as sumVerifiedUsers, applied
+      // at this finer per-country granularity. A row below the volume
+      // threshold is kept as-is (not enough signal to call it a bot farm at
+      // this granularity) — consistent with the conservative design elsewhere.
+      const looksAutomated = avgDur < MIN_HUMAN_SESSION_SECS && sessions >= MIN_SEGMENT_SESSIONS;
+      if (looksAutomated) {
+        totalExcluded += users;
+        continue;
+      }
+      totalVerified += users;
+      const region = classifyCountryRegion(country);
+      regionMap[region].users += users;
+      regionMap[region].sessions += sessions;
+    }
+    const regions = Object.entries(regionMap)
+      .map(([region, data]) => ({ region, ...data, pct: totalVerified > 0 ? Math.round((data.users / totalVerified) * 1000) / 10 : 0 }))
+      .sort((a, b) => b.users - a.users);
+    return { regions, totalVerified, totalExcluded };
+  } catch (e: any) {
+    console.error("[analytics] GA4 verified regions error:", e.message);
+    return { regions: [] as Array<{ region: string; users: number; sessions: number; pct: number }>, totalVerified: 0, totalExcluded: 0 };
   }
 }
 

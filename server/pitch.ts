@@ -1069,6 +1069,11 @@ type CanonicalAudienceStats = {
   monthly_verified_readers: number;
   monthly_verified_readers_fmt: string;
   excluded_bot_users: number;
+  // Region split computed with the SAME automated-segment exclusion as
+  // monthly_verified_readers above (not the crude BOT_COUNTRIES filter) —
+  // see fetchGA4VerifiedRegions for why the plain country-only breakdown
+  // is not used here (it skews toward wherever bot traffic geolocates).
+  region_breakdown: Array<{ region: string; users: number; sessions: number; pct: number }>;
 } | null;
 
 let canonicalStatsCache: { ts: number; data: CanonicalAudienceStats } | null = null;
@@ -1085,12 +1090,13 @@ export async function getCanonicalAudienceStats(forceRefresh = false): Promise<C
     const start = new Date(end); start.setDate(start.getDate() - 29);
     const fmt = (d: Date) => d.toISOString().slice(0, 10);
     // No excludeCountries / includeCountries — GA4's own default bot filtering only.
-    const { fetchCloudflareUniques, fetchGA4OSBreakdown, sumVerifiedUsers } = await import("./analytics");
-    const [overview, countries, cfStats, osRows] = await Promise.all([
+    const { fetchCloudflareUniques, fetchGA4OSBreakdown, sumVerifiedUsers, fetchGA4VerifiedRegions } = await import("./analytics");
+    const [overview, countries, cfStats, osRows, regionResult] = await Promise.all([
       fetchGA4Overview(fmt(start), fmt(end)),
       fetchGA4Countries(fmt(start), fmt(end), 250),
       fetchCloudflareUniques(fmt(start), fmt(end)).catch(() => null),
       fetchGA4OSBreakdown(fmt(start), fmt(end)).catch(() => []),
+      fetchGA4VerifiedRegions(fmt(start), fmt(end)).catch(() => ({ regions: [], totalVerified: 0, totalExcluded: 0 })),
     ]);
     if (!overview) {
       lastCanonicalStatsError = "GA4 returned null — see server logs.";
@@ -1130,6 +1136,7 @@ export async function getCanonicalAudienceStats(forceRefresh = false): Promise<C
       monthly_verified_readers: verifiedResult.verified,
       monthly_verified_readers_fmt: formatCompact(verifiedResult.verified),
       excluded_bot_users: verifiedResult.excludedUsers,
+      region_breakdown: regionResult.regions,
     };
     canonicalStatsCache = { ts: now, data };
     return data;

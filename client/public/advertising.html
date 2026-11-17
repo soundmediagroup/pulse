@@ -393,10 +393,11 @@
       <div class="sn-adv-audience-col">
         <h3>By Region</h3>
         <ul>
-          <li><strong>38%</strong> Asia</li>
-          <li><strong>26%</strong> UK &amp; Europe</li>
-          <li><strong>21%</strong> North America</li>
-          <li><strong>13%</strong> Australia &amp; New Zealand</li>
+          <li id="sn-adv-region-asia"><strong>38%</strong> Asia</li>
+          <li id="sn-adv-region-eu"><strong>26%</strong> UK &amp; Europe</li>
+          <li id="sn-adv-region-na"><strong>21%</strong> North America</li>
+          <li id="sn-adv-region-anz"><strong>13%</strong> Australia &amp; New Zealand</li>
+          <li id="sn-adv-region-other" style="display:none;"><strong>0%</strong> Other markets</li>
           <li>Genuinely global — 80+ markets monthly</li>
         </ul>
       </div>
@@ -743,6 +744,42 @@
           var cfNum = document.getElementById('sn-adv-cf-uniques');
           if (cfNum) cfNum.textContent = j.cloudflare_uniques_fmt;
           if (cfNote) cfNote.style.display = 'block';
+        }
+
+        // Region split — same automated-segment exclusion as the headline
+        // "verified readers" figure above (see fetchGA4VerifiedRegions
+        // server-side), NOT the old static guess. Regions come back as:
+        // Americas, "UK & Europe", "Australia/NZ/Pacific", Asia,
+        // "Middle East", Africa. The page only has room for 4 buckets, so
+        // Middle East + Africa fold into a 5th "Other markets" row that
+        // stays hidden if negligible.
+        if (Array.isArray(j.region_breakdown) && j.region_breakdown.length) {
+          var byName = {};
+          j.region_breakdown.forEach(function(r){ byName[r.region] = r; });
+          function pctOf(name){ return byName[name] ? byName[name].pct : 0; }
+          var asiaPct = pctOf('Asia');
+          var euPct = pctOf('UK & Europe');
+          var naPct = pctOf('Americas');
+          var anzPct = pctOf('Australia/NZ/Pacific');
+          var otherPct = Math.round((pctOf('Middle East') + pctOf('Africa')) * 10) / 10;
+          function setRegion(id, pct, label){
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.innerHTML = '<strong>' + pct + '%</strong> ' + label;
+          }
+          setRegion('sn-adv-region-asia', asiaPct, 'Asia');
+          setRegion('sn-adv-region-eu', euPct, 'UK &amp; Europe');
+          setRegion('sn-adv-region-na', naPct, 'North America');
+          setRegion('sn-adv-region-anz', anzPct, 'Australia &amp; New Zealand');
+          var otherEl = document.getElementById('sn-adv-region-other');
+          if (otherEl) {
+            if (otherPct > 0) {
+              setRegion('sn-adv-region-other', otherPct, 'Other markets');
+              otherEl.style.display = '';
+            } else {
+              otherEl.style.display = 'none';
+            }
+          }
         }
       })
       .catch(function(){});
