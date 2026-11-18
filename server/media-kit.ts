@@ -273,6 +273,96 @@ export async function refreshLiveAudienceGridDefaults(): Promise<{ updated: numb
   return { updated, skipped };
 }
 
+// The "audience" block ("Global Reach, Regionally Targeted") is a second,
+// separate place the readers figure + region split live — found 18 Nov 2026
+// when a prospect still saw a stale number here after audience_grid was
+// already fixed. It carries a use_live_ga4 flag that was never actually
+// wired up; this makes that true. Only touches kit 1 (kits 2-5 inherit it;
+// kit 6 has its own hand-edited copy and is skipped like everywhere else).
+async function refreshLiveAudienceBlock(): Promise<{ updated: boolean }> {
+  const row = sqlite.prepare(
+    `SELECT edited_at, content_json FROM media_kit_blocks WHERE kit_id = 1 AND block_key = 'audience'`
+  ).get() as any;
+  if (!row || row.edited_at) return { updated: false };
+  try {
+    const { getCanonicalAudienceStats } = await import("./pitch");
+    const stats = await getCanonicalAudienceStats();
+    if (!stats) return { updated: false };
+    const cur = JSON.parse(row.content_json);
+    const byName: Record<string, number> = {};
+    for (const r of stats.region_breakdown || []) byName[r.region] = r.pct;
+    // This block only has room for 4 buckets (no "Other"); fold Middle East
+    // + Africa's small share in by simply not displaying it and renormalising
+    // the remaining 4 so they still sum to ~100%.
+    const raw = {
+      Asia: byName["Asia"] || 0,
+      "UK & Europe": byName["UK & Europe"] || 0,
+      "North America": byName["Americas"] || 0,
+      ANZ: byName["Australia/NZ/Pacific"] || 0,
+    };
+    const sum = Object.values(raw).reduce((a, b) => a + b, 0) || 1;
+    cur.subheading = `Where our ${stats.monthly_verified_readers_fmt}+ monthly readers live`;
+    cur.region_split = Object.entries(raw).map(([region, pct]) => ({
+      region,
+      pct: Math.round((pct / sum) * 1000) / 10,
+    }));
+    sqlite.prepare(`UPDATE media_kit_blocks SET content_json = ? WHERE kit_id = 1 AND block_key = 'audience'`)
+      .run(JSON.stringify(cur));
+    return { updated: true };
+  } catch (e: any) {
+    console.error("[media-kit] refreshLiveAudienceBlock failed:", e.message);
+    return { updated: false };
+  }
+}
+
+// Narrow, surgical fix for the OTHER place a stale reader count hides: human-
+// written headline/prose blocks (hero proof points, the who_are_we bullet
+// list) that happen to embed the figure as a literal "700K+" / "700,000+"
+// substring. These blocks ARE hand-edited (edited_at set) so the normal
+// refresh functions correctly leave them alone — but the number inside is
+// still just data, not voice, so it's safe to regex-replace ONLY that
+// substring and leave every other word of the human's copy untouched.
+// Kit 6 (Retailer) is deliberately excluded — ask before touching it, same
+// as the audience_grid/audience refresh above.
+async function refreshEmbeddedReaderFigures(): Promise<{ updated: Array<{ kitId: number; blockKey: string }> }> {
+  const updated: Array<{ kitId: number; blockKey: string }> = [];
+  try {
+    const { getCanonicalAudienceStats } = await import("./pitch");
+    const stats = await getCanonicalAudienceStats();
+    if (!stats) return { updated };
+    const newCompact = `${stats.monthly_verified_readers_fmt}+`; // e.g. "716K+"
+    const newLong = `${stats.monthly_verified_readers.toLocaleString("en-US")}+`; // e.g. "716,491+"
+    const targets = [
+      { kitId: 1, blockKey: "hero" },
+      { kitId: 2, blockKey: "hero" },
+      { kitId: 3, blockKey: "hero" },
+      { kitId: 4, blockKey: "hero" },
+      { kitId: 5, blockKey: "hero" },
+      { kitId: 1, blockKey: "who_are_we" },
+    ];
+    for (const t of targets) {
+      const row = sqlite.prepare(
+        `SELECT content_json FROM media_kit_blocks WHERE kit_id = ? AND block_key = ?`
+      ).get(t.kitId, t.blockKey) as any;
+      if (!row) continue;
+      let text = row.content_json as string;
+      const before = text;
+      // Compact form: "700K+" and any other "<digits>K+" figure in this spot.
+      text = text.replace(/\b\d{2,4}K\+/g, newCompact);
+      // Long form: "700,000+" and variants.
+      text = text.replace(/\b\d{1,3}(?:,\d{3})+\+/g, newLong);
+      if (text !== before) {
+        sqlite.prepare(`UPDATE media_kit_blocks SET content_json = ? WHERE kit_id = ? AND block_key = ?`)
+          .run(text, t.kitId, t.blockKey);
+        updated.push(t);
+      }
+    }
+  } catch (e: any) {
+    console.error("[media-kit] refreshEmbeddedReaderFigures failed:", e.message);
+  }
+  return { updated };
+}
+
 function defaultFeaturedArticle(): any {
   return {
     enabled: true,
@@ -939,8 +1029,10 @@ export function registerMediaKitRoutes(app: Express) {
   // months stale relative to the live advertising/press-releases pages.
   app.post("/api/media-kit/admin/refresh-audience-grid", requireKitAccess("admin"), async (req: any, res) => {
     try {
-      const result = await refreshLiveAudienceGridDefaults();
-      res.json({ ok: true, ...result });
+      const grid = await refreshLiveAudienceGridDefaults();
+      const audience = await refreshLiveAudienceBlock();
+      const figures = await refreshEmbeddedReaderFigures();
+      res.json({ ok: true, audience_grid: grid, audience_block: audience, embedded_figures: figures });
     } catch (e: any) {
       res.status(500).json({ ok: false, message: e?.message });
     }
