@@ -209,6 +209,70 @@ function defaultAudienceGrid(): any {
   };
 }
 
+// Live version of the grid above — pulls the GA4-sourced tiles (readers,
+// pageviews, avg time on site) from the same canonical stats function that
+// backs the advertising page and press-releases page, so a brand-new or
+// refreshed media kit never ships with a stale hand-typed number again.
+// Survey/Facebook/ABS-sourced tiles (forum size, age split, income, social
+// reach) have no live feed and stay as static copy, same as before — someone
+// still needs to refresh those manually when a new survey/report lands.
+async function buildLiveAudienceGridTiles(): Promise<any> {
+  const grid = defaultAudienceGrid();
+  try {
+    const { getCanonicalAudienceStats } = await import("./pitch");
+    const stats = await getCanonicalAudienceStats();
+    if (stats) {
+      const set = (label: string, value: string, note?: string) => {
+        const tile = grid.tiles.find((t: any) => t.label === label);
+        if (tile) {
+          tile.value = value;
+          if (note) tile.note = note;
+        }
+      };
+      set("Monthly readers", `${stats.monthly_verified_readers_fmt}+`,
+        `Verified active users (automated traffic excluded), GA4 last 30 days as of ${stats.as_of} — same canonical figure as the advertising page and press-releases page`);
+      set("Monthly page views", `${stats.monthly_pageviews_fmt}+`,
+        `GA4 last 30 days as of ${stats.as_of} — same canonical figure as the advertising page and press-releases page`);
+      set("Avg. time on site", stats.avg_session_label,
+        `GA4 last 30 days as of ${stats.as_of} — longer than typical hi-fi sites`);
+    } else {
+      console.warn("[media-kit] buildLiveAudienceGridTiles: getCanonicalAudienceStats returned null, falling back to static defaults");
+    }
+  } catch (e: any) {
+    console.error("[media-kit] buildLiveAudienceGridTiles failed, falling back to static defaults:", e.message);
+  }
+  return grid;
+}
+
+// Template kits whose audience_grid block should track live numbers. These
+// are the shared/unconverted kits prospects land on directly (not a
+// per-prospect clone, which freezes its own numbers at creation time by
+// design — see media-kit-deploy skill notes on the baked-in-proposal trap).
+const LIVE_AUDIENCE_GRID_KIT_IDS = [1, 2, 3, 4, 5, 6];
+
+// Re-stamps audience_grid with current live numbers on every template kit
+// that hasn't been manually hand-edited (edited_at IS NULL). Safe to run
+// repeatedly — never touches a kit an admin has customised, and never
+// touches a prospect-specific clone (those aren't in the id list above).
+export async function refreshLiveAudienceGridDefaults(): Promise<{ updated: number[]; skipped: number[] }> {
+  const tiles = await buildLiveAudienceGridTiles();
+  const updated: number[] = [];
+  const skipped: number[] = [];
+  for (const kitId of LIVE_AUDIENCE_GRID_KIT_IDS) {
+    const row = sqlite.prepare(
+      `SELECT edited_at FROM media_kit_blocks WHERE kit_id = ? AND block_key = 'audience_grid'`
+    ).get(kitId) as any;
+    if (!row) { skipped.push(kitId); continue; }
+    if (row.edited_at) { skipped.push(kitId); continue; }
+    sqlite.prepare(
+      `UPDATE media_kit_blocks SET content_json = ? WHERE kit_id = ? AND block_key = 'audience_grid'`
+    ).run(JSON.stringify(tiles), kitId);
+    updated.push(kitId);
+  }
+  console.log(`[media-kit] refreshLiveAudienceGridDefaults: updated kits [${updated.join(", ")}], skipped [${skipped.join(", ")}]`);
+  return { updated, skipped };
+}
+
 function defaultFeaturedArticle(): any {
   return {
     enabled: true,
@@ -865,6 +929,21 @@ export function registerMediaKitRoutes(app: Express) {
     sqlite.prepare(`UPDATE media_kits SET block_order_override_json = NULL WHERE id = ?`).run(id);
     const blocks = getEffectiveBlocks(id);
     res.json({ ok: true, blocks });
+  });
+
+  // Re-stamp the live-sourced audience_grid tiles (readers/pageviews/avg
+  // time on site) onto every template kit that hasn't been hand-edited.
+  // Run monthly via cron (see refreshLiveAudienceGridDefaults doc comment)
+  // and also right after the canonical GA4 methodology changes, so a
+  // prospect landing on a template kit directly never sees a number that's
+  // months stale relative to the live advertising/press-releases pages.
+  app.post("/api/media-kit/admin/refresh-audience-grid", requireKitAccess("admin"), async (req: any, res) => {
+    try {
+      const result = await refreshLiveAudienceGridDefaults();
+      res.json({ ok: true, ...result });
+    } catch (e: any) {
+      res.status(500).json({ ok: false, message: e?.message });
+    }
   });
 
   // Get one kit with effective (inherited+override) blocks + addons resolved by region
