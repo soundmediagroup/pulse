@@ -2033,14 +2033,10 @@ export const storage: IStorage = {
     // from all sites.
     const trustedSitesList = [...AUDIO_SITES, ...ALWAYS_VISIBLE_SITES, ...GOLD_STANDARD_SITES];
     const trustedPlaceholders = trustedSitesList.map(() => "?").join(",");
-    // Gold-standard publishers (eCoustics, Stereophile, Absolute Sound, What Hi-Fi,
-    // Hi-Fi News, Hi-Fi+) are meant to be 100% surfaced per the comment below — but
-    // until this fix, their 'review' content_type was silently excluded by this SQL
-    // regardless of gold-standard status, dropping ~25% of eCoustics' real output
-    // (every review) from Discovery. Fixed 2026-11-24 (Marc: eCoustics is the
-    // benchmark source — all of its articles should surface, not just non-reviews).
-    const goldStandardList = [...GOLD_STANDARD_SITES];
-    const goldPlaceholders = goldStandardList.map(() => "?").join(",");
+    // NOTE (Marc, 2026-11-24): Discovery must NOT show reviews, from any site,
+    // including gold-standard ones. A same-day attempt to also surface eCoustics'
+    // reviews (on the theory that "100% surfaced" in the comment above should
+    // include reviews) was explicitly reverted — Discovery is News only.
     let rows = sqlite.prepare(`
       SELECT * FROM articles
       WHERE site != 'stereonet'
@@ -2053,11 +2049,10 @@ export const storage: IStorage = {
           OR content_type = 'feature'
           OR content_type = 'opinion'
           OR (content_type = 'unknown' AND site IN (${trustedPlaceholders}))
-          OR (content_type = 'review' AND site IN (${goldPlaceholders}))
         )
       ORDER BY published_at DESC
       LIMIT ?
-    `).all(...trustedSitesList, ...goldStandardList, limit * 5) as Article[];
+    `).all(...trustedSitesList, limit * 5) as Article[];
 
     // Filter to only enabled sites — but always-visible + gold-standard sites bypass the whitelist
     rows = rows.filter(a => ALWAYS_VISIBLE_SITES.has(a.site) || GOLD_STANDARD_SITES.has(a.site) || enabledSiteKeys.has(a.site));
