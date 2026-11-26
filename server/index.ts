@@ -270,6 +270,7 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
   if (req.path.startsWith("/api/media-kit/public/")) return next(); // Media Kit public access — gated by magic_token in URL
   if (req.path === "/api/media-kit/request") return next(); // Public form-submission endpoint from /advertising page
   if (req.path === "/advertising" || req.path === "/advertising/") return next(); // Public advertising landing page
+  if (req.path.startsWith("/partners/")) return next(); // Public personalized partnership one-pagers (no PII, static files)
   if (req.path === "/stereonet-logo.svg" || req.path === "/stereonet-logo-trim.svg" || req.path === "/stereonet-logo.jpg" || req.path === "/favicon.ico") return next(); // Public site assets
   if (req.path.startsWith("/kit/")) return next(); // Media Kit client-facing route — SPA handles token check
   // Static SPA bundles, source maps, and SPA-public static files (fonts, public images,
