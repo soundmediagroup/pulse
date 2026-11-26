@@ -70,6 +70,7 @@
   .btn:hover { background: var(--sn-accent-hover); }
   .cta-sub { font-size: 12px; color: var(--sn-muted); margin-top: 10px; }
   .foot { text-align: center; padding: 24px 0 0; color: var(--sn-muted); font-size: 11px; line-height: 1.6; }
+  .live-tag { font-size: 9px; color: var(--sn-muted); vertical-align: super; }
 </style>
 </head>
 <body>
@@ -82,98 +83,91 @@
 
   <section class="sn-adv-hero">
     <h1>Your 7 questions, answered.</h1>
-    <p class="lede">Straight numbers, ahead of our call w/c 13 December.</p>
+    <p class="lede">Live numbers, ahead of our call w/c 13 December.</p>
   </section>
 
   <div class="q">
     <div class="q-head"><span class="q-num">01</span><span class="q-title">Monthly uniques</span></div>
     <div class="q-body">
       <div class="stat-row">
-        <div class="stat"><div class="n">1.2M</div><div class="l">Monthly Visitors, Global</div></div>
-        <div class="stat"><div class="n">35K</div><div class="l">Monthly Visitors, Australia</div></div>
-        <div class="stat"><div class="n">628K+</div><div class="l">Verified (Bot-Filtered)</div></div>
+        <div class="stat"><div class="n" id="stat-global-visitors">1.2M</div><div class="l">Monthly Visitors, Global</div></div>
+        <div class="stat"><div class="n" id="stat-au-visitors">35K</div><div class="l">Monthly Visitors, Australia</div></div>
+        <div class="stat"><div class="n" id="stat-global-verified">628K+</div><div class="l">Verified (Bot-Filtered), Global</div></div>
       </div>
     </div>
   </div>
 
   <div class="q">
-    <div class="q-head"><span class="q-num">02</span><span class="q-title">Article views &amp; traction</span></div>
+    <div class="q-head"><span class="q-num">02</span><span class="q-title">Editorial content — views &amp; traction</span></div>
     <div class="q-body">
-      <p class="mini">No single "average" — it swings hugely by category. Here's actual traffic by content type (AU readers, 8-week sample):</p>
-      <div class="stat-row">
-        <div class="stat"><div class="n">142K</div><div class="l">Classifieds Views</div></div>
-        <div class="stat"><div class="n">77K</div><div class="l">Forums Views</div></div>
-        <div class="stat"><div class="n">35K</div><div class="l">Reviews &amp; News Views</div></div>
-        <div class="stat"><div class="n">13K</div><div class="l">Floorstanders Views</div></div>
+      <p class="mini">Reviews &amp; category pages only — forums/classifieds excluded. AU readers, rolling 30 days:</p>
+      <div class="chip-row" id="editorial-content-list">
+        <div class="chip">Loading live data…</div>
       </div>
     </div>
   </div>
 
   <div class="q">
-    <div class="q-head"><span class="q-num">03</span><span class="q-title">Channels</span></div>
+    <div class="q-head"><span class="q-num">03</span><span class="q-title">Channels (AU traffic, by source)</span></div>
     <div class="q-body">
-      <div class="chip-row">
-        <div class="chip">stereonet.com editorial</div>
-        <div class="chip">100K+ forum community</div>
-        <div class="chip">Classifieds marketplace</div>
-        <div class="chip">EDM newsletter, 200K+ subs</div>
-        <div class="chip">Social (Meta)</div>
-        <div class="chip">Ask StereoNET (AI assistant)</div>
-        <div class="chip">AU/UK/Singapore Hi-Fi Shows</div>
-        <div class="chip">Cited by ChatGPT/Perplexity — 170K+ hits/mo</div>
+      <div class="bar-list" id="channel-list">
+        <div class="bar-row"><div class="bar-name">Loading…</div><div class="bar-track"></div><div class="bar-pct"></div></div>
       </div>
+      <p class="mini" style="margin-top:12px">Plus: 100K+ forum community, 200K+ subscriber EDM newsletter, social (Meta), and citation in AI assistants (ChatGPT/Perplexity) — not session-tracked as "channels" above, but real reach.</p>
     </div>
   </div>
 
   <div class="q">
     <div class="q-head"><span class="q-num">04</span><span class="q-title">Australian vs. international</span></div>
     <div class="q-body">
-      <p class="mini"><b>Australia is ~3% of our readers — and ~27% of everything actually read.</b> Smallest audience, by far the deepest engagement.</p>
+      <p class="mini" id="au-vs-intl-lede"><b>Loading live comparison…</b></p>
       <div class="bar-list">
-        <div class="bar-row"><div class="bar-name">Share of readers (AU)</div><div class="bar-track"><div class="bar-fill" style="width:10%"></div></div><div class="bar-pct">2.9%</div></div>
-        <div class="bar-row"><div class="bar-name">Share of pageviews (AU)</div><div class="bar-track"><div class="bar-fill" style="width:90%"></div></div><div class="bar-pct">26.9%</div></div>
-        <div class="bar-row"><div class="bar-name">Avg. time on site (AU)</div><div class="bar-track"><div class="bar-fill" style="width:95%"></div></div><div class="bar-pct">6m 05s</div></div>
-        <div class="bar-row"><div class="bar-name">Returning visitors (AU)</div><div class="bar-track"><div class="bar-fill" style="width:69%"></div></div><div class="bar-pct">69%</div></div>
+        <div class="bar-row"><div class="bar-name">Share of real* users</div><div class="bar-track"><div class="bar-fill" id="bar-users" style="width:10%"></div></div><div class="bar-pct" id="pct-users">—</div></div>
+        <div class="bar-row"><div class="bar-name">Share of real* pageviews</div><div class="bar-track"><div class="bar-fill" id="bar-pageviews" style="width:90%"></div></div><div class="bar-pct" id="pct-pageviews">—</div></div>
+        <div class="bar-row"><div class="bar-name">Avg. time on site (AU)</div><div class="bar-track"><div class="bar-fill" style="width:95%"></div></div><div class="bar-pct" id="pct-session">—</div></div>
+        <div class="bar-row"><div class="bar-name">Returning visitors (AU)</div><div class="bar-track"><div class="bar-fill" id="bar-returning" style="width:69%"></div></div><div class="bar-pct" id="pct-returning">—</div></div>
       </div>
+      <p class="mini" style="margin-top:10px">*"Real" = total traffic excluding known bot-heavy countries (Singapore/China/Hong Kong) — the same filter StereoNET uses site-wide, not a number picked to flatter this pitch.</p>
     </div>
   </div>
 
   <div class="q">
-    <div class="q-head"><span class="q-num">05</span><span class="q-title">Demographics</span></div>
+    <div class="q-head"><span class="q-num">05</span><span class="q-title">Who they are</span></div>
     <div class="q-body">
       <div class="stat-row">
-        <div class="stat"><div class="n">93%</div><div class="l">Aged 45+</div></div>
-        <div class="stat"><div class="n">86%</div><div class="l">In Hobby 20+ Years</div></div>
-        <div class="stat"><div class="n">90%</div><div class="l">AU Traffic Earned, Not Paid</div></div>
+        <div class="stat"><div class="n" id="stat-earned">90%</div><div class="l">AU Traffic Earned, Not Paid</div></div>
+        <div class="stat"><div class="n" id="stat-session2">6m 05s</div><div class="l">Avg. Time on Site, AU</div></div>
+        <div class="stat"><div class="n">100K+</div><div class="l">Active Forum Members</div></div>
         <div class="stat"><div class="n">$55K+</div><div class="l">Avg. Discretionary Income/yr*</div></div>
       </div>
-      <p class="mini" style="margin-top:10px">*StereoNET Reader Survey, n=540. Multi-system households, peak buying years — the audience that actually funds the industry.</p>
+      <p class="mini" style="margin-top:10px">They skew experienced — which means they're the ones friends and family ask before buying. Real purchase influence beyond their own wallet, not just a review audience.<br>*StereoNET Reader Survey, n=540.</p>
     </div>
   </div>
 
   <div class="q">
-    <div class="q-head"><span class="q-num">06</span><span class="q-title">Best-performing content</span></div>
+    <div class="q-head"><span class="q-num">06</span><span class="q-title">Best fit for JBL's lineup</span></div>
     <div class="q-body">
-      <p class="mini">Top AU content, in order — speakers, amps, sources, soundbars. Directly in JBL's lane:</p>
+      <p class="mini">Lifestyle-adjacent categories lead AU engagement — closest match to JBL's range:</p>
       <div class="chip-row">
-        <div class="chip">Classifieds</div><div class="chip">Forums</div><div class="chip">Reviews &amp; News</div>
-        <div class="chip">Floorstanders</div><div class="chip">DACs &amp; Streamers</div><div class="chip">Integrated Amps</div>
-        <div class="chip">Power Amps</div><div class="chip">Bookshelf Speakers</div><div class="chip">Home Cinema / Soundbars</div>
+        <div class="chip">Home Cinema / Soundbars</div><div class="chip">Bookshelf Speakers</div>
+        <div class="chip">Portable &amp; Lifestyle Audio</div><div class="chip">DACs &amp; Streamers</div>
+        <div class="chip">Integrated Amps</div>
       </div>
+      <p class="mini" style="margin-top:10px">Classifieds &amp; Forums (100K+ members) sit outside editorial reach above, but are where upgrade/resale decisions actually happen — a real pathway to reach aspirational, not-yet-premium buyers.</p>
     </div>
   </div>
 
   <div class="q">
-    <div class="q-head"><span class="q-num">07</span><span class="q-title">Cost to engage — annual package</span></div>
+    <div class="q-head"><span class="q-num">07</span><span class="q-title">Cost to engage — monthly package</span></div>
     <div class="q-body">
       <div class="tiers">
-        <div class="tier"><div class="label">Partner</div><div class="price">$499</div><span class="per">AUD ex GST / yr</span>
+        <div class="tier"><div class="label">Partner</div><div class="price">$499</div><span class="per">AUD ex GST / month</span>
           <ul><li>Forum + Classifieds</li></ul></div>
-        <div class="tier"><div class="label">Bronze</div><div class="price">$1,499</div><span class="per">AUD ex GST / yr</span>
+        <div class="tier"><div class="label">Bronze</div><div class="price">$1,499</div><span class="per">AUD ex GST / month</span>
           <ul><li>1 banner</li><li>2 reviews/yr</li></ul></div>
-        <div class="tier"><div class="label">Silver</div><div class="price">$2,799</div><span class="per">AUD ex GST / yr</span>
+        <div class="tier"><div class="label">Silver</div><div class="price">$2,799</div><span class="per">AUD ex GST / month</span>
           <ul><li>2 banners</li><li>4 reviews/yr</li><li>5% discount</li></ul></div>
-        <div class="tier gold"><div class="label">Gold</div><div class="price">$3,999</div><span class="per">AUD ex GST / yr</span>
+        <div class="tier gold"><div class="label">Gold</div><div class="price">$3,999</div><span class="per">AUD ex GST / month</span>
           <ul><li>3 banners</li><li>6 reviews/yr</li><li>10% discount</li></ul></div>
         <div class="tier"><div class="label">Platinum</div><div class="price">POA</div><span class="per">Custom scope</span>
           <ul><li>Custom placements</li><li>6+ reviews/yr</li><li>15% discount</li></ul></div>
@@ -193,11 +187,76 @@
     <div class="cta-sub">Jason Sexton · StereoNET</div>
   </div>
 
-  <div class="foot">
-    AU + global figures: Google Analytics 4, rolling 30 days, as of 26 Nov 2026. Demographics &amp; research-source data: StereoNET Reader Survey, n=540.<br>
+  <div class="foot" id="methodology-foot">
+    AU + global figures: Google Analytics 4, rolling 30 days. Demographics &amp; research-source data: StereoNET Reader Survey, n=540.<br>
     Prepared confidentially for Harman/JBL — not for external distribution.
   </div>
 
 </div>
+
+<script>
+(function(){
+  function fmtNum(n){
+    if (n >= 1000000) return (n/1000000).toFixed(1).replace('.0','') + 'M';
+    if (n >= 1000) return Math.round(n/1000) + 'K';
+    return String(n);
+  }
+  function setText(id, val){ var el = document.getElementById(id); if (el) el.textContent = val; }
+
+  // Global headline numbers — same source as the main /advertising page.
+  fetch('/api/public/audience-stats', { cache: 'no-store' })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      if (!j || !j.ok) return;
+      if (j.monthly_visitors_fmt) setText('stat-global-visitors', j.monthly_visitors_fmt);
+      var verified = j.monthly_verified_readers_fmt || j.engaged_users_est_fmt;
+      if (verified) setText('stat-global-verified', verified + '+');
+    })
+    .catch(function(){});
+
+  // AU-specific detail — new live endpoint.
+  fetch('/api/public/au-audience-stats', { cache: 'no-store' })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      if (!j || !j.ok) return;
+
+      setText('stat-au-visitors', fmtNum(j.au_monthly_visitors));
+      setText('stat-earned', j.au_earned_traffic_pct + '%');
+      setText('stat-session2', j.au_avg_session_label);
+      setText('pct-session', j.au_avg_session_label);
+      setText('pct-users', j.au_share_of_real_users_pct + '%');
+      setText('pct-pageviews', j.au_share_of_real_pageviews_pct + '%');
+      setText('pct-returning', j.au_returning_pct + '%');
+      var barU = document.getElementById('bar-users'); if (barU) barU.style.width = Math.max(j.au_share_of_real_users_pct * 2, 6) + '%';
+      var barP = document.getElementById('bar-pageviews'); if (barP) barP.style.width = Math.min(j.au_share_of_real_pageviews_pct * 2.2, 100) + '%';
+      var barR = document.getElementById('bar-returning'); if (barR) barR.style.width = j.au_returning_pct + '%';
+
+      var lede = document.getElementById('au-vs-intl-lede');
+      if (lede) lede.innerHTML = '<b>Australia is ~' + j.au_share_of_real_users_pct + '% of real readers — and ~' + j.au_share_of_real_pageviews_pct + '% of everything actually read.</b> Smallest audience, by far the deepest engagement.';
+
+      if (Array.isArray(j.au_channels) && j.au_channels.length) {
+        var total = j.au_channels.reduce(function(s,c){ return s + c.sessions; }, 0) || 1;
+        var list = document.getElementById('channel-list');
+        if (list) {
+          list.innerHTML = j.au_channels.slice(0, 6).map(function(c){
+            var pct = Math.round((c.sessions / total) * 1000) / 10;
+            return '<div class="bar-row"><div class="bar-name">' + c.channel + '</div><div class="bar-track"><div class="bar-fill" style="width:' + Math.min(pct * 1.4, 100) + '%"></div></div><div class="bar-pct">' + pct + '%</div></div>';
+          }).join('');
+        }
+      }
+
+      if (Array.isArray(j.au_top_editorial_content) && j.au_top_editorial_content.length) {
+        var el = document.getElementById('editorial-content-list');
+        if (el) {
+          el.innerHTML = j.au_top_editorial_content.slice(0, 8).map(function(c){
+            return '<div class="chip">' + c.title + ' — ' + fmtNum(c.pageviews) + '</div>';
+          }).join('');
+        }
+      }
+    })
+    .catch(function(){});
+})();
+</script>
+
 </body>
 </html>

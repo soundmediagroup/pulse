@@ -6,7 +6,7 @@ import crypto from "node:crypto";
 import multer from "multer";
 import { sqlite, storage } from "./storage";
 import { cfg } from "./config";
-import { fetchGA4Overview, fetchGA4Countries, BOT_COUNTRIES, fetchSCQueriesForBrand } from "./analytics";
+import { fetchGA4Overview, fetchGA4Countries, BOT_COUNTRIES, fetchSCQueriesForBrand, fetchGA4AUDetail } from "./analytics";
 import { saveAttachment } from "./attachments";
 
 const logoUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
@@ -1343,6 +1343,28 @@ export function registerPitchRoutes(app: Express) {
     if (!data) {
       return res.status(503).json({ ok: false, error: getLastCanonicalStatsError() || "unavailable" });
     }
+    res.json({ ok: true, ...data });
+  });
+
+  // Public, unauthenticated, read-only Australia-specific audience detail —
+  // used by partner one-pagers (e.g. /partners/*.html) so country-level
+  // numbers never go stale. Cached in-process for 1 hour.
+  let auDetailCache: { ts: number; data: any } | null = null;
+  app.get("/api/public/au-audience-stats", async (req: any, res: any) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Cache-Control", "public, max-age=1800");
+    const now = Date.now();
+    if (auDetailCache && (now - auDetailCache.ts) < 60 * 60 * 1000) {
+      return res.json({ ok: true, ...auDetailCache.data });
+    }
+    const end = new Date(); end.setDate(end.getDate() - 1);
+    const start = new Date(end); start.setDate(start.getDate() - 29);
+    const fmt = (d: Date) => d.toISOString().slice(0, 10);
+    const data = await fetchGA4AUDetail(fmt(start), fmt(end));
+    if (!data) {
+      return res.status(503).json({ ok: false, error: "unavailable" });
+    }
+    auDetailCache = { ts: now, data };
     res.json({ ok: true, ...data });
   });
 

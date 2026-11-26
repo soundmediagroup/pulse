@@ -759,3 +759,118 @@ export async function fetchSCSearchTypes(startDate: string, endDate: string) {
   );
   return results.filter(Boolean);
 }
+
+
+// ─── Australia-specific live detail (used by partner one-pagers) ──────────
+// Mirrors the same methodology as the canonical site-wide stats above:
+// GA4 native filtering + the same BOT_COUNTRIES exclusion for the "real"
+// denominator. Returns AU user/session/pageview counts, AU share of the
+// real (bot-country-excluded) total, avg session length, returning-visitor
+// rate, channel mix, and top EDITORIAL (not forum/classifieds/ad) content.
+export async function fetchGA4AUDetail(startDate: string, endDate: string) {
+  const a = getAuth();
+  if (!a) return null;
+  try {
+    const analyticsdata = google.analyticsdata({ version: "v1beta", auth: a });
+    const prop = `properties/${GA4_PROPERTY()}`;
+    const auFilter = { filter: { fieldName: "country", stringFilter: { value: "Australia" } } };
+    const notBotFilter = { notExpression: { filter: { fieldName: "country", inListFilter: { values: BOT_COUNTRIES as any } } } };
+
+    const [auOverview, realTotal, channelsRes, contentRes, newVsReturningRes] = await Promise.all([
+      fetchGA4Overview(startDate, endDate, undefined, ["Australia"]),
+      fetchGA4Overview(startDate, endDate, BOT_COUNTRIES as any),
+      analyticsdata.properties.runReport({
+        property: prop,
+        requestBody: {
+          dateRanges: [{ startDate, endDate }],
+          dimensions: [{ name: "sessionDefaultChannelGroup" }],
+          metrics: [{ name: "sessions" }],
+          dimensionFilter: auFilter,
+          orderBys: [{ metric: { metricName: "sessions" }, desc: true } ],
+          limit: 15,
+        },
+      }),
+      analyticsdata.properties.runReport({
+        property: prop,
+        requestBody: {
+          dateRanges: [{ startDate, endDate }],
+          dimensions: [{ name: "pageTitle" }],
+          metrics: [{ name: "screenPageViews" }],
+          dimensionFilter: {
+            andGroup: {
+              expressions: [
+                auFilter,
+                { notExpression: { filter: { fieldName: "pageTitle", stringFilter: { matchType: "CONTAINS", value: "Forum" } } } },
+                { notExpression: { filter: { fieldName: "pageTitle", stringFilter: { matchType: "CONTAINS", value: "Classifieds" } } } },
+                { notExpression: { filter: { fieldName: "pageTitle", stringFilter: { matchType: "CONTAINS", value: "Ads" } } } },
+                { notExpression: { filter: { fieldName: "pageTitle", stringFilter: { matchType: "CONTAINS", value: "Sign In" } } } },
+              ],
+            },
+          },
+          orderBys: [{ metric: { metricName: "screenPageViews" }, desc: true }],
+          limit: 10,
+        },
+      }),
+      analyticsdata.properties.runReport({
+        property: prop,
+        requestBody: {
+          dateRanges: [{ startDate, endDate }],
+          dimensions: [{ name: "newVsReturning" }],
+          metrics: [{ name: "sessions" }],
+          dimensionFilter: auFilter,
+        },
+      }),
+    ]);
+
+    if (!auOverview || !realTotal) return null;
+
+    const channels = (channelsRes.data.rows || []).map(row => ({
+      channel: row.dimensionValues![0].value!,
+      sessions: parseInt(row.metricValues![0].value!),
+    }));
+    const totalAuSessions = channels.reduce((s, c) => s + c.sessions, 0) || auOverview.sessions;
+
+    const topContent = (contentRes.data.rows || []).map(row => ({
+      title: row.dimensionValues![0].value!,
+      pageviews: parseInt(row.metricValues![0].value!),
+    }));
+
+    const nvrRows = (newVsReturningRes.data.rows || []).map(row => ({
+      type: row.dimensionValues![0].value!,
+      sessions: parseInt(row.metricValues![0].value!),
+    }));
+    const returningSessions = nvrRows.find(r => r.type === "returning")?.sessions || 0;
+    const nvrTotal = nvrRows.reduce((s, r) => s + r.sessions, 0) || 1;
+    const returningPct = Math.round((returningSessions / nvrTotal) * 1000) / 10;
+
+    const secs = Math.round(auOverview.avgSessionDuration || 0);
+    const mins = Math.floor(secs / 60);
+    const rem = secs % 60;
+
+    const earnedSessions = channels
+      .filter(c => c.channel === "Organic Search" || c.channel === "Direct")
+      .reduce((s, c) => s + c.sessions, 0);
+    const earnedPct = totalAuSessions ? Math.round((earnedSessions / totalAuSessions) * 1000) / 10 : 0;
+
+    return {
+      period_days: startDate.includes("30") ? 30 : null,
+      au_monthly_visitors: auOverview.activeUsers,
+      au_monthly_sessions: auOverview.sessions,
+      au_monthly_pageviews: auOverview.pageviews,
+      au_share_of_real_users_pct: Math.round((auOverview.activeUsers / realTotal.activeUsers) * 1000) / 10,
+      au_share_of_real_sessions_pct: Math.round((auOverview.sessions / realTotal.sessions) * 1000) / 10,
+      au_share_of_real_pageviews_pct: Math.round((auOverview.pageviews / realTotal.pageviews) * 1000) / 10,
+      au_avg_session_seconds: secs,
+      au_avg_session_label: `${mins}m ${String(rem).padStart(2, "0")}s`,
+      au_returning_pct: returningPct,
+      au_earned_traffic_pct: earnedPct,
+      au_channels: channels,
+      au_top_editorial_content: topContent,
+      real_total_users_excl_bot_countries: realTotal.activeUsers,
+      methodology: "Google Analytics 4. AU share computed against a 'real' denominator that excludes known bot-heavy countries (Singapore/China/Hong Kong), same BOT_COUNTRIES list used site-wide. Editorial content excludes Forums/Classifieds/Ads/Sign-in pages.",
+    };
+  } catch (e: any) {
+    console.error("[analytics] GA4 AU detail error:", e.message);
+    return null;
+  }
+}
