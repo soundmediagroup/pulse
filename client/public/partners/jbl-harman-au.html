@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StereoNET × Harman/JBL — Australia</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+  .sn-adv {
+    --sn-accent: #e8312a;
+    --sn-accent-hover: #ff4f48;
+    --sn-text: #1a1a1c;
+    --sn-text-soft: #2a2a2e;
+    --sn-muted: #6b6b70;
+    --sn-card: #f8f8fa;
+    --sn-card-2: #1a1a1c;
+    --sn-card-2-text: #fff;
+    --sn-card-2-text-soft: #d0d0d3;
+    --sn-border: #e8e8eb;
+  }
+  @media (prefers-color-scheme: dark) {
+    .sn-adv {
+      --sn-text: #f4f4f5; --sn-text-soft: #d4d4d7; --sn-muted: #9a9aa0;
+      --sn-card: #1c1c1f; --sn-card-2: #0e0e10; --sn-card-2-text: #fff;
+      --sn-card-2-text-soft: #b0b0b6; --sn-border: #2a2a2e;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fff; }
+  @media (prefers-color-scheme: dark) { body { background: #0e0e10; } }
+  .sn-adv { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; color: var(--sn-text); max-width: 980px; margin: 0 auto; padding: 0 24px; }
+  @media (max-width: 600px) { .sn-adv { padding: 0 16px; } }
+  .sn-adv .accent { color: var(--sn-accent); }
+  .sn-adv .muted { color: var(--sn-muted); }
+
+  .sn-topbar { display: flex; align-items: center; justify-content: space-between; padding: 28px 0 0; }
+  .sn-topbar img { height: 26px; display: block; }
+  .sn-topbar .tag { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sn-muted); text-align: right; }
+
+  .sn-adv-hero { padding: 48px 0 32px; text-align: center; }
+  @media (max-width: 600px) { .sn-adv-hero { padding: 32px 0 20px; } }
+  .sn-adv-hero h1 { font-size: clamp(28px, 5vw, 50px); font-weight: 800; letter-spacing: -0.025em; line-height: 1.08; margin: 0 0 14px; }
+  .sn-adv-hero .lede { font-size: clamp(14px, 1.6vw, 18px); color: var(--sn-text-soft); max-width: 620px; margin: 0 auto; line-height: 1.5; }
+
+  .sn-adv-stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; padding: 36px 0; border-top: 1px solid var(--sn-border); border-bottom: 1px solid var(--sn-border); margin-top: 12px; }
+  @media (max-width: 900px) { .sn-adv-stats { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 520px) { .sn-adv-stats { grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 24px 0; } }
+  .sn-adv-stat { text-align: center; }
+  .sn-adv-stat-num { font-size: clamp(22px, 3.2vw, 34px); font-weight: 800; color: var(--sn-accent); line-height: 1; letter-spacing: -0.02em; }
+  .sn-adv-stat-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--sn-muted); margin-top: 7px; line-height: 1.3; }
+
+  .sn-why { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 40px 0 8px; }
+  @media (max-width: 760px) { .sn-why { grid-template-columns: 1fr; } }
+  .sn-why-card { background: var(--sn-card); border-radius: 12px; padding: 22px; }
+  .sn-why-card .n { font-size: 13px; font-weight: 800; color: var(--sn-accent); letter-spacing: 0.04em; }
+  .sn-why-card h3 { font-size: 17px; font-weight: 800; margin: 8px 0 6px; }
+  .sn-why-card p { font-size: 13.5px; color: var(--sn-text-soft); line-height: 1.45; margin: 0; }
+
+  .sn-section { padding: 56px 0 16px; }
+  .sn-section h2 { font-size: clamp(20px, 2.6vw, 30px); font-weight: 800; letter-spacing: -0.02em; margin: 0 0 6px; }
+  .sn-section .sub { font-size: 13px; color: var(--sn-muted); margin: 0 0 28px; }
+
+  .sn-tiers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  @media (max-width: 900px) { .sn-tiers { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .sn-tiers { grid-template-columns: 1fr; } }
+  .sn-tier { border: 1px solid var(--sn-border); border-radius: 12px; padding: 20px 16px; text-align: center; }
+  .sn-tier.gold { border-color: var(--sn-accent); background: rgba(232,49,42,0.04); }
+  .sn-tier .label { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--sn-muted); }
+  .sn-tier.gold .label { color: var(--sn-accent); }
+  .sn-tier .price { font-size: 24px; font-weight: 800; margin: 8px 0 2px; }
+  .sn-tier .per { font-size: 11px; color: var(--sn-muted); margin-bottom: 10px; display: block; }
+  .sn-tier ul { list-style: none; margin: 10px 0 0; padding: 0; text-align: left; }
+  .sn-tier li { font-size: 12px; color: var(--sn-text-soft); padding: 3px 0; }
+
+  .sn-addons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 18px; }
+  @media (max-width: 760px) { .sn-addons { grid-template-columns: repeat(2, 1fr); } }
+  .sn-addon { background: var(--sn-card); border-radius: 10px; padding: 14px 16px; }
+  .sn-addon .t { font-size: 13px; font-weight: 700; }
+  .sn-addon .p { font-size: 15px; font-weight: 800; color: var(--sn-accent); margin-top: 4px; }
+
+  .sn-cta-wrap { text-align: center; padding: 36px 0 8px; }
+  .sn-adv-btn-primary { display: inline-block; background: var(--sn-accent); color: #fff; font-weight: 700; font-size: 15px; padding: 14px 28px; border-radius: 8px; text-decoration: none; }
+  .sn-adv-btn-primary:hover { background: var(--sn-accent-hover); }
+
+  .sn-adv-foot { text-align: center; padding: 28px 0 40px; color: var(--sn-muted); font-size: 11.5px; border-top: 1px solid var(--sn-border); margin-top: 28px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="sn-adv">
+
+  <div class="sn-topbar">
+    <img src="/stereonet-logo-trim.svg" alt="StereoNET">
+    <div class="tag">Prepared for Noeleen<br>Harman / JBL · Australia</div>
+  </div>
+
+  <section class="sn-adv-hero">
+    <h1>Smallest audience.<br><span class="accent">Deepest engagement.</span></h1>
+    <p class="lede">Australians are 3% of StereoNET's readers — and 28% of everything actually read.</p>
+  </section>
+
+  <section class="sn-adv-stats">
+    <div class="sn-adv-stat"><div class="sn-adv-stat-num">27.8%</div><div class="sn-adv-stat-label">Of All Pageviews, From AU</div></div>
+    <div class="sn-adv-stat"><div class="sn-adv-stat-num">5m 49s</div><div class="sn-adv-stat-label">Avg. Time on Site, AU</div></div>
+    <div class="sn-adv-stat"><div class="sn-adv-stat-num">69%</div><div class="sn-adv-stat-label">Returning AU Visitors</div></div>
+    <div class="sn-adv-stat"><div class="sn-adv-stat-num">90%</div><div class="sn-adv-stat-label">Earned, Not Paid Traffic</div></div>
+    <div class="sn-adv-stat"><div class="sn-adv-stat-num">934K</div><div class="sn-adv-stat-label">AU Pageviews / 8 Weeks</div></div>
+    <div class="sn-adv-stat"><div class="sn-adv-stat-num">628K+</div><div class="sn-adv-stat-label">Verified Monthly Readers, Global</div></div>
+  </section>
+
+  <section class="sn-why">
+    <div class="sn-why-card">
+      <div class="n">01</div>
+      <h3>Reading to buy</h3>
+      <p>Top AU content: amps, speakers, DACs, soundbars, floorstanders. Harman's categories, already their habit.</p>
+    </div>
+    <div class="sn-why-card">
+      <div class="n">02</div>
+      <h3>Trust that transfers</h3>
+      <p>90% of AU traffic is organic or direct — readers coming back on their own, not chasing an ad.</p>
+    </div>
+    <div class="sn-why-card">
+      <div class="n">03</div>
+      <h3>Small and mighty</h3>
+      <p>3% of readers, 28% of pages read. The most committed audience on the platform.</p>
+    </div>
+  </section>
+
+  <section class="sn-section">
+    <h2>Your Media Kit</h2>
+    <p class="sub">Harman / JBL · Australia &amp; New Zealand · generated via PULSE, 26 Nov 2026</p>
+
+    <div class="sn-tiers">
+      <div class="sn-tier">
+        <div class="label">Partner</div>
+        <div class="price">$499</div>
+        <span class="per">AUD ex GST</span>
+        <ul><li>Forum presence</li><li>Classifieds access</li></ul>
+      </div>
+      <div class="sn-tier">
+        <div class="label">Bronze</div>
+        <div class="price">$1,499</div>
+        <span class="per">AUD ex GST</span>
+        <ul><li>1 banner placement</li><li>2 reviews / campaign</li></ul>
+      </div>
+      <div class="sn-tier">
+        <div class="label">Silver</div>
+        <div class="price">$2,799</div>
+        <span class="per">AUD ex GST</span>
+        <ul><li>2 banner placements</li><li>4 reviews / campaign</li><li>5% discount</li></ul>
+      </div>
+      <div class="sn-tier gold">
+        <div class="label">Gold</div>
+        <div class="price">$3,999</div>
+        <span class="per">AUD ex GST</span>
+        <ul><li>3 banner placements</li><li>6 reviews / campaign</li><li>10% discount</li></ul>
+      </div>
+      <div class="sn-tier">
+        <div class="label">Platinum</div>
+        <div class="price">POA</div>
+        <span class="per">Custom scope</span>
+        <ul><li>Custom placements</li><li>6+ reviews / campaign</li><li>15% discount</li></ul>
+      </div>
+    </div>
+
+    <div class="sn-addons">
+      <div class="sn-addon"><div class="t">Newsletter Banner</div><div class="p">$2,499 / email</div></div>
+      <div class="sn-addon"><div class="t">Social Boost — 1 month</div><div class="p">$2,799</div></div>
+      <div class="sn-addon"><div class="t">Brand Profile — Inside Track</div><div class="p">$3,499</div></div>
+      <div class="sn-addon"><div class="t">Exclusive EDM Send</div><div class="p">$2,999</div></div>
+    </div>
+
+    <div class="sn-cta-wrap">
+      <a href="mailto:marc@stereonet.com?subject=Harman%2FJBL%20x%20StereoNET%20Partnership" class="sn-adv-btn-primary">Let's build your package</a>
+    </div>
+  </section>
+
+  <div class="sn-adv-foot">
+    AU figures: Google Analytics 4, 2 Oct – 25 Nov 2026 (first full window since GA4 went live sitewide). Global 628K+ figure: GA4, rolling 30 days, confirmed automated-traffic segments removed.<br>
+    Prepared confidentially for Harman/JBL by StereoNET — not for external distribution.
+  </div>
+
+</div>
+</body>
+</html>
